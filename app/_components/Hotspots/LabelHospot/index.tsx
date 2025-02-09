@@ -42,7 +42,7 @@ const Label = ({ position, groupRef, occlude = false, onClick, label = "Hotspot"
           }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="bg-transparent border-[6px] border-[#c9ed08] rounded-full p-2 hover:border-[#d4f31a] transition-colors duration-200"
+          className="bg-transparent border-2 border-[#c9ed08] rounded-full p-0.5 hover:border-[#d4f31a] transition-colors duration-200"
         />
       </div>
     </Html>

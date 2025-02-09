@@ -1,11 +1,10 @@
 import { useGLTF } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Group } from "three";
 import ClickableHotspot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
-
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 const Machine = () => {
@@ -15,15 +14,52 @@ const Machine = () => {
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
   const actionsRef = useRef<THREE.AnimationAction[]>([]);
   const previousComponentRef = useRef<string | null>(null);
-  const originalMaterialRef = useRef<THREE.Material | null>(null);
-  const highlightedMeshRef = useRef<THREE.Mesh | null>(null);
-  const [hotspotPosition, setHotspotPosition] = useState<[number, number, number]>([0, 0, 0]);
-  const worldPosition = new THREE.Vector3();
-
+  const [hotspots, setHotspots] = useState<{ name: string; position: [number, number, number] }[]>([]);
+  const worldPosition = useMemo(() => new THREE.Vector3(), []);
   const { handleSetActiveComponent, activeComponent } = useActiveComponent();
   const groupRef = useRef<Group>(null);
 
-  // Initialize animation mixer and actions
+  const meshNamesToLabel = useMemo(
+    () => [
+      // "SCERMO_LED",
+      // "SCOCCA_POSTERIORE_1",
+      // "SPORTELLO_SCOCCA",
+      // "Tastiera_RetroIlluminata",
+      // "AGGANCIO_2",
+      // "BASE_MOTORE",
+      // "SCHEDA001_5",
+      {
+        name: "SCERMO_LED",
+        label: "Schermo LED",
+      },
+      {
+        name: "SCOCCA_POSTERIORE_1",
+        label: "Scocca Posteriore",
+      },
+      {
+        name: "SPORTELLO_SCOCCA",
+        label: "Sportello Scocca",
+      },
+      {
+        name: "Tastiera_RetroIlluminata",
+        label: "Tastiera Retroilluminata",
+      },
+      {
+        name: "AGGANCIO_2",
+        label: "Aggancio 2",
+      },
+      {
+        name: "BASE_MOTORE",
+        label: "Base Motore",
+      },
+      {
+        name: "SCHEDA001_5",
+        label: "Scheda 001.5",
+      },
+    ],
+    []
+  ); //ovide the names of the meshes to label
+
   useEffect(() => {
     if (!result.animations.length || !modelRef.current) {
       console.error("No animations found in model");
@@ -31,8 +67,6 @@ const Machine = () => {
     }
 
     mixerRef.current = new THREE.AnimationMixer(modelRef.current);
-
-    // Store all actions in ref for later control
     actionsRef.current = result.animations.map((clip) => {
       const action = mixerRef.current!.clipAction(clip);
       action.setLoop(THREE.LoopOnce, 1);
@@ -40,50 +74,20 @@ const Machine = () => {
       return action;
     });
 
-    // Find and highlight the first mesh
-    let firstMeshFound = false;
+    const foundHotspots: { name: string; position: [number, number, number] }[] = [];
     result.scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh && !firstMeshFound) {
-        const mesh = child as THREE.Mesh;
-        highlightedMeshRef.current = mesh;
-        firstMeshFound = true;
-
-        console.log("Found first mesh:", mesh.name); // Debug log
-
-        // Store the original material
-        // @ts-expect-error Property 'material' does not exist on type 'Object3D'
-        originalMaterialRef.current = mesh.material;
-
-        // Create and apply highlight material
-        const highlightMaterial = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(0xffff00),
-          emissive: new THREE.Color(0x444400),
-          metalness: 0.5,
-          roughness: 0.5,
-          transparent: true,
-          opacity: 0.8,
+      const foundEntity = meshNamesToLabel.find((mesh) => mesh.name === child.name);
+      if ((child as THREE.Mesh).isMesh && foundEntity) {
+        child.getWorldPosition(worldPosition);
+        foundHotspots.push({
+          name: foundEntity.label,
+          position: [worldPosition.x, worldPosition.y, worldPosition.z],
         });
-
-        mesh.material = highlightMaterial;
-
-        // Initialize hotspot position
-        mesh.getWorldPosition(worldPosition);
-        setHotspotPosition([worldPosition.x, worldPosition.y, worldPosition.z]);
       }
     });
+    setHotspots(foundHotspots);
+  }, [result.animations, result.scene, meshNamesToLabel, worldPosition]);
 
-    // Cleanup function
-    return () => {
-      mixerRef.current?.stopAllAction();
-      actionsRef.current.forEach((action) => action.stop());
-
-      if (highlightedMeshRef.current && originalMaterialRef.current) {
-        highlightedMeshRef.current.material = originalMaterialRef.current;
-      }
-    };
-  }, [result.animations, result.scene]);
-
-  // Handle animation playback when activeComponent changes
   useEffect(() => {
     if (activeComponent === "machine") {
       if (previousComponentRef.current !== "machine") {
@@ -101,24 +105,27 @@ const Machine = () => {
     previousComponentRef.current = activeComponent;
   }, [activeComponent]);
 
-  // Update animation frame and hotspot position
   useFrame(() => {
     if (mixerRef.current && isAnimationPlaying) {
       mixerRef.current.update(1 / 60);
-    }
 
-    if (highlightedMeshRef.current) {
-      // Update matrix world to ensure correct position
-      highlightedMeshRef.current.updateMatrixWorld(true);
-      highlightedMeshRef.current.getWorldPosition(worldPosition);
+      // Update the position of the hotspots
 
-      // Add a small offset to make the hotspot more visible
-      const offset = 0.2; // Adjust this value as needed
-      setHotspotPosition([worldPosition.x, worldPosition.y, worldPosition.z]);
+      const newHotspots = [...hotspots];
+      result.scene.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh && meshNamesToLabel.map((mesh) => mesh.name).includes(child.name)) {
+          child.getWorldPosition(worldPosition);
+          const hotspot = newHotspots.find((hotspot) => hotspot.name === child.name);
+          if (hotspot) {
+            hotspot.position = [worldPosition.x, worldPosition.y, worldPosition.z];
+          }
+        }
+      });
+
+      setHotspots(newHotspots);
     }
   });
 
-  // Set up shadows and material properties
   useEffect(() => {
     result.scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -133,37 +140,46 @@ const Machine = () => {
     });
   }, [result.scene]);
 
+  // console.log(hotspots[0]?.position);
+
   return (
     <group ref={groupRef}>
       <primitive ref={modelRef} object={result.scene} />
 
-      <ClickableHotspot
-        position={[0.1, 1, 0.1]}
-        groupRef={groupRef}
-        onClick={() => {
-          handleSetActiveComponent("machine");
-        }}
-      />
-      <ClickableHotspot
-        position={[-0.1, 1, 0.1]}
-        groupRef={groupRef}
-        onClick={() => {
-          handleSetActiveComponent("machine");
-        }}
-      />
-      {/* Dynamic hotspot that follows the first mesh */}
-      <LabelHostpot
-        position={hotspotPosition}
-        groupRef={groupRef}
-        onClick={() => {
-          handleSetActiveComponent("machine");
-        }}
-      />
+      {!activeComponent && (
+        <>
+          <ClickableHotspot
+            position={[0.1, 1, 0.1]}
+            groupRef={groupRef}
+            onClick={() => {
+              handleSetActiveComponent("machine");
+            }}
+          />
+          <ClickableHotspot
+            position={[-0.1, 1, 0.1]}
+            groupRef={groupRef}
+            onClick={() => {
+              handleSetActiveComponent("machine");
+            }}
+          />
+        </>
+      )}
+
+      {hotspots.map((hotspot) => (
+        <LabelHostpot
+          key={hotspot.name}
+          label={hotspot.name}
+          position={hotspot.position}
+          groupRef={groupRef}
+          onClick={() => {
+            handleSetActiveComponent("machine");
+          }}
+        />
+      ))}
     </group>
   );
 };
 
-// Preload the model
 useGLTF.preload("./models/Corpo Dolphin.glb");
 
 export default Machine;
