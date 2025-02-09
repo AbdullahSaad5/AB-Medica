@@ -22,13 +22,6 @@ const Machine = () => {
 
   const meshNamesToLabel = useMemo(
     () => [
-      // "SCERMO_LED",
-      // "SCOCCA_POSTERIORE_1",
-      // "SPORTELLO_SCOCCA",
-      // "Tastiera_RetroIlluminata",
-      // "AGGANCIO_2",
-      // "BASE_MOTORE",
-      // "SCHEDA001_5",
       {
         name: "SCERMO_LED",
         label: "Schermo LED",
@@ -59,7 +52,7 @@ const Machine = () => {
       },
     ],
     []
-  ); //ovide the names of the meshes to label
+  ); //Provide the names of the meshes to label
 
   useEffect(() => {
     if (!result.animations.length || !modelRef.current) {
