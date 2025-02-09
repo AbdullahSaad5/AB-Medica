@@ -122,16 +122,16 @@ const Machine = () => {
 
       const newHotspots = [...hotspots];
       result.scene.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh && meshNamesToLabel.map((mesh) => mesh.name).includes(child.name)) {
+        const foundEntity = meshNamesToLabel.find((mesh) => mesh.name === child.name);
+        if ((child as THREE.Mesh).isMesh && foundEntity) {
           child.getWorldPosition(worldPosition);
-          const hotspot = newHotspots.find((hotspot) => hotspot.name === child.name);
+          const hotspot = newHotspots.find((hotspot) => hotspot.name === foundEntity.label);
           if (hotspot) {
             hotspot.position = [worldPosition.x, worldPosition.y, worldPosition.z];
           }
         }
       });
 
-      console.log("Updating hotspots");
       setHotspots(newHotspots);
     }
   });
