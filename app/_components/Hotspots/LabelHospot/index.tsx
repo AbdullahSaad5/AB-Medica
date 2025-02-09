@@ -8,10 +8,13 @@ type HotspotProps = {
   occlude?: boolean;
   onClick?: () => void;
   label?: string; // New prop for the label text
+  show?: boolean;
 };
 
-const Label = ({ position, groupRef, occlude = false, onClick, label = "Hotspot" }: HotspotProps) => {
+const Label = ({ position, groupRef, occlude = false, onClick, label = "Hotspot", show = true }: HotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  if (!show) return;
 
   return (
     <Html

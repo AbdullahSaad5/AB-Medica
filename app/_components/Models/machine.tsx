@@ -60,6 +60,7 @@ const Machine = () => {
 
       {hotspots.map((hotspot) => (
         <LabelHostpot
+          show={isActive}
           key={hotspot.name}
           label={hotspot.name}
           position={hotspot.position}
