@@ -5,6 +5,7 @@ import * as THREE from "three";
 import type { Group } from "three";
 import ClickableHotspot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
+
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 const Machine = () => {
@@ -86,14 +87,28 @@ const Machine = () => {
       }
     });
     setHotspots(foundHotspots);
+
+    // Cleanup function
+    return () => {
+      mixerRef.current?.stopAllAction();
+      actionsRef.current.forEach((action) => action.stop());
+    };
   }, [result.animations, result.scene, meshNamesToLabel, worldPosition]);
 
+  // Handle animation playback when activeComponent changes
   useEffect(() => {
     if (activeComponent === "machine") {
       if (previousComponentRef.current !== "machine") {
         actionsRef.current.forEach((action) => {
           action.reset();
           action.play();
+          action.clampWhenFinished = true;
+          action.loop = THREE.LoopOnce;
+
+          // Add event listener to log when animation stops
+          action.getMixer().addEventListener("finished", () => {
+            setIsAnimationPlaying(false);
+          });
         });
         setIsAnimationPlaying(true);
       }
@@ -105,6 +120,7 @@ const Machine = () => {
     previousComponentRef.current = activeComponent;
   }, [activeComponent]);
 
+  // Update animation frame and hotspot position
   useFrame(() => {
     if (mixerRef.current && isAnimationPlaying) {
       mixerRef.current.update(1 / 60);
@@ -122,10 +138,12 @@ const Machine = () => {
         }
       });
 
+      console.log("Updating hotspots");
       setHotspots(newHotspots);
     }
   });
 
+  // Set up shadows and material properties
   useEffect(() => {
     result.scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -140,31 +158,24 @@ const Machine = () => {
     });
   }, [result.scene]);
 
-  // console.log(hotspots[0]?.position);
-
   return (
     <group ref={groupRef}>
       <primitive ref={modelRef} object={result.scene} />
 
-      {!activeComponent && (
-        <>
-          <ClickableHotspot
-            position={[0.1, 1, 0.1]}
-            groupRef={groupRef}
-            onClick={() => {
-              handleSetActiveComponent("machine");
-            }}
-          />
-          <ClickableHotspot
-            position={[-0.1, 1, 0.1]}
-            groupRef={groupRef}
-            onClick={() => {
-              handleSetActiveComponent("machine");
-            }}
-          />
-        </>
-      )}
-
+      <ClickableHotspot
+        position={[0.1, 1, 0.1]}
+        groupRef={groupRef}
+        onClick={() => {
+          handleSetActiveComponent("machine");
+        }}
+      />
+      <ClickableHotspot
+        position={[-0.1, 1, 0.1]}
+        groupRef={groupRef}
+        onClick={() => {
+          handleSetActiveComponent("machine");
+        }}
+      />
       {hotspots.map((hotspot) => (
         <LabelHostpot
           key={hotspot.name}
@@ -180,6 +191,7 @@ const Machine = () => {
   );
 };
 
+// Preload the model
 useGLTF.preload("./models/Corpo Dolphin.glb");
 
 export default Machine;
