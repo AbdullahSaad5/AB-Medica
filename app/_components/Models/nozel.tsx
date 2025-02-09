@@ -1,7 +1,7 @@
 import { useGLTF } from "@react-three/drei";
 import React, { useRef } from "react";
 import { Group } from "three";
-import Hotspot from "../Hotspot";
+import Hotspot from "../Hotspots/ButtonHotspot";
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 const Nozel = () => {
