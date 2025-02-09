@@ -1,183 +1,70 @@
 import { useGLTF } from "@react-three/drei";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
 import type { Group } from "three";
 import ClickableHotspot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
-
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
+import { useAnimationMixer } from "@/app/hooks/useAnimationMixer";
+import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
 
 const Machine = () => {
   const result = useGLTF("./models/Corpo Dolphin.glb");
-  const modelRef = useRef<Group>();
-  const mixerRef = useRef<THREE.AnimationMixer>();
-  const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
-  const actionsRef = useRef<THREE.AnimationAction[]>([]);
-  const previousComponentRef = useRef<string | null>(null);
-  const [hotspots, setHotspots] = useState<{ name: string; position: [number, number, number] }[]>([]);
-  const worldPosition = useMemo(() => new THREE.Vector3(), []);
-  const { handleSetActiveComponent, activeComponent } = useActiveComponent();
+  const modelRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
+  const { handleSetActiveComponent, activeComponent } = useActiveComponent();
+  const isActive = activeComponent === "machine";
 
-  const meshNamesToLabel = useMemo(
-    () => [
-      {
-        name: "SCERMO_LED",
-        label: "Schermo LED",
-      },
-      {
-        name: "SCOCCA_POSTERIORE_1",
-        label: "Scocca Posteriore",
-      },
-      {
-        name: "SPORTELLO_SCOCCA",
-        label: "Sportello Scocca",
-      },
-      {
-        name: "Tastiera_RetroIlluminata",
-        label: "Tastiera Retroilluminata",
-      },
-      {
-        name: "AGGANCIO_2",
-        label: "Aggancio 2",
-      },
-      {
-        name: "BASE_MOTORE",
-        label: "Base Motore",
-      },
-      {
-        name: "SCHEDA001_5",
-        label: "Scheda 001.5",
-      },
-    ],
-    []
-  ); //Provide the names of the meshes to label
-
-  useEffect(() => {
-    if (!result.animations.length || !modelRef.current) {
-      console.error("No animations found in model");
-      return;
-    }
-
-    mixerRef.current = new THREE.AnimationMixer(modelRef.current);
-    actionsRef.current = result.animations.map((clip) => {
-      const action = mixerRef.current!.clipAction(clip);
-      action.setLoop(THREE.LoopOnce, 1);
-      action.clampWhenFinished = true;
-      return action;
-    });
-
-    const foundHotspots: { name: string; position: [number, number, number] }[] = [];
-    result.scene.traverse((child) => {
-      const foundEntity = meshNamesToLabel.find((mesh) => mesh.name === child.name);
-      if ((child as THREE.Mesh).isMesh && foundEntity) {
-        child.getWorldPosition(worldPosition);
-        foundHotspots.push({
-          name: foundEntity.label,
-          position: [worldPosition.x, worldPosition.y, worldPosition.z],
-        });
-      }
-    });
-    setHotspots(foundHotspots);
-
-    // Cleanup function
-    return () => {
-      mixerRef.current?.stopAllAction();
-      actionsRef.current.forEach((action) => action.stop());
-    };
-  }, [result.animations, result.scene, meshNamesToLabel, worldPosition]);
-
-  // Handle animation playback when activeComponent changes
-  useEffect(() => {
-    if (activeComponent === "machine") {
-      if (previousComponentRef.current !== "machine") {
-        actionsRef.current.forEach((action) => {
-          action.reset();
-          action.play();
-          action.clampWhenFinished = true;
-          action.loop = THREE.LoopOnce;
-
-          // Add event listener to log when animation stops
-          action.getMixer().addEventListener("finished", () => {
-            setIsAnimationPlaying(false);
-          });
-        });
-        setIsAnimationPlaying(true);
-      }
-    } else {
-      actionsRef.current.forEach((action) => action.stop());
-      setIsAnimationPlaying(false);
-    }
-
-    previousComponentRef.current = activeComponent;
-  }, [activeComponent]);
-
-  // Update animation frame and hotspot position
-  useFrame(() => {
-    if (mixerRef.current && isAnimationPlaying) {
-      mixerRef.current.update(1 / 60);
-
-      // Update the position of the hotspots
-
-      const newHotspots = [...hotspots];
-      result.scene.traverse((child) => {
-        const foundEntity = meshNamesToLabel.find((mesh) => mesh.name === child.name);
-        if ((child as THREE.Mesh).isMesh && foundEntity) {
-          child.getWorldPosition(worldPosition);
-          const hotspot = newHotspots.find((hotspot) => hotspot.name === foundEntity.label);
-          if (hotspot) {
-            hotspot.position = [worldPosition.x, worldPosition.y, worldPosition.z];
-          }
-        }
-      });
-
-      setHotspots(newHotspots);
-    }
+  const { mixer, isAnimationPlaying } = useAnimationMixer({
+    modelRef,
+    animations: result.animations,
+    isActive,
   });
 
-  // Set up shadows and material properties
-  useEffect(() => {
-    result.scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        if (mesh.material) {
-          // @ts-expect-error Property 'side' does not exist on type 'Material'
-          mesh.material.side = THREE.FrontSide;
-        }
-      }
-    });
-  }, [result.scene]);
+  const { hotspots } = useHotspotPositions({
+    scene: result.scene,
+    meshNamesToLabel: [
+      { name: "SCERMO_LED", label: "Schermo LED" },
+      { name: "SCOCCA_POSTERIORE_1", label: "Scocca Posteriore" },
+      { name: "SPORTELLO_SCOCCA", label: "Sportello Scocca" },
+      { name: "Tastiera_RetroIlluminata", label: "Tastiera Retroilluminata" },
+      { name: "AGGANCIO_2", label: "Aggancio 2" },
+      { name: "BASE_MOTORE", label: "Base Motore" },
+      { name: "SCHEDA001_5", label: "Scheda 001.5" },
+    ],
+  });
+
+  useFrame(() => {
+    if (mixer.current && isAnimationPlaying) {
+      mixer.current.update(1 / 60);
+    }
+  });
 
   return (
     <group ref={groupRef}>
       <primitive ref={modelRef} object={result.scene} />
+      {!activeComponent && (
+        <>
+          <ClickableHotspot
+            position={[0.1, 1, 0.1]}
+            groupRef={groupRef}
+            onClick={() => handleSetActiveComponent("machine")}
+          />
+          <ClickableHotspot
+            position={[-0.1, 1, 0.1]}
+            groupRef={groupRef}
+            onClick={() => handleSetActiveComponent("device")}
+          />
+        </>
+      )}
 
-      <ClickableHotspot
-        position={[0.1, 1, 0.1]}
-        groupRef={groupRef}
-        onClick={() => {
-          handleSetActiveComponent("machine");
-        }}
-      />
-      <ClickableHotspot
-        position={[-0.1, 1, 0.1]}
-        groupRef={groupRef}
-        onClick={() => {
-          handleSetActiveComponent("machine");
-        }}
-      />
       {hotspots.map((hotspot) => (
         <LabelHostpot
           key={hotspot.name}
           label={hotspot.name}
           position={hotspot.position}
           groupRef={groupRef}
-          onClick={() => {
-            handleSetActiveComponent("machine");
-          }}
+          onClick={() => handleSetActiveComponent("machine")}
         />
       ))}
     </group>
