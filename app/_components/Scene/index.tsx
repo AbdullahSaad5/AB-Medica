@@ -1,5 +1,7 @@
 import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useThree } from "@react-three/fiber";
+import * as THREE from "three";
 import Stand from "../Models/stand";
 import Nozel from "../Models/nozel";
 import Machine from "../Models/machine";
@@ -8,46 +10,80 @@ import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 const Scene = () => {
   const controlsRef = useRef(null);
-
+  const groupRef = useRef<THREE.Group | null>(null);
+  const { camera } = useThree();
   const { activeComponent } = useActiveComponent();
+
+  useEffect(() => {
+    if (groupRef.current) {
+      // Compute bounding box
+      const box = new THREE.Box3().setFromObject(groupRef.current);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Update OrbitControls target
+      if (controlsRef.current) {
+        controlsRef.current.target.set(center.x, center.y, center.z);
+        controlsRef.current.update();
+      }
+
+      // Adjust camera position relative to model size
+      const size = box.getSize(new THREE.Vector3());
+      const maxSize = Math.max(size.x, size.y, size.z);
+
+      // Dynamically adjust zoom levels
+      const zoomFactor =
+        activeComponent === "stand"
+          ? 1.5
+          : activeComponent === "nozel"
+          ? 1.2
+          : activeComponent === "machine"
+          ? 1.5
+          : activeComponent === "device"
+          ? 1.8
+          : 1;
+
+      camera.position.set(
+        center.x + maxSize * zoomFactor,
+        center.y + maxSize * zoomFactor,
+        center.z + maxSize * zoomFactor
+      );
+      camera.lookAt(center);
+
+      // Adjust OrbitControls zoom constraints dynamically
+      if (controlsRef.current) {
+        controlsRef.current.minDistance = maxSize * 0.8;
+        controlsRef.current.maxDistance = maxSize * 2.5;
+      }
+    }
+  }, [activeComponent, camera]);
 
   return (
     <>
-      <PerspectiveCamera
-        makeDefault
-        position={[4, 4, 4]} // Adjusted initial camera position
-        fov={50}
-      />
+      <PerspectiveCamera makeDefault fov={50} />
       <ambientLight intensity={0.2} />
       <color attach="background" args={["#31a2d6"]} />
-      {!activeComponent ? (
-        <>
+
+      <group ref={groupRef}>
+        {!activeComponent ? (
+          <>
+            <Stand />
+            <Nozel />
+            <Machine />
+            <Device />
+          </>
+        ) : activeComponent === "stand" ? (
           <Stand />
+        ) : activeComponent === "nozel" ? (
           <Nozel />
+        ) : activeComponent === "machine" ? (
           <Machine />
+        ) : (
           <Device />
-        </>
-      ) : activeComponent === "stand" ? (
-        <Stand />
-      ) : activeComponent === "nozel" ? (
-        <Nozel />
-      ) : activeComponent === "machine" ? (
-        <Machine />
-      ) : (
-        <Device />
-      )}
-      {/* <Stand />
-      <Nozel />
-      <Machine />
-      <Device /> */}
-      <OrbitControls
-        ref={controlsRef}
-        minDistance={2}
-        maxDistance={10}
-        // minPolarAngle={Math.PI / 4} // Limit bottom angle
-        // maxPolarAngle={Math.PI / 1.5} // Limit top angle
-        enablePan={false} // Optional: disable panning to keep focus
-      />
+        )}
+      </group>
+
+      <OrbitControls ref={controlsRef} enablePan={false} />
       <Environment preset="city" />
     </>
   );
