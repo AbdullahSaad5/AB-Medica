@@ -1,7 +1,7 @@
 import { useGLTF } from "@react-three/drei";
 import React, { useRef } from "react";
 import { Group } from "three";
-import Hotspot from "../Hotspots/ButtonHotspot";
+import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { useAnimationMixer } from "@/app/hooks/useAnimationMixer";
 import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
@@ -107,7 +107,11 @@ const Nozel = () => {
       <primitive ref={modelRef} object={result.scene} />
 
       {!activeComponent && (
-        <Hotspot position={[0, 1, 0.3]} groupRef={groupRef} onClick={() => handleSetActiveComponent("nozel")} />
+        <ClickableHotSpot
+          position={[0, 1, 0.3]}
+          groupRef={groupRef}
+          onClick={() => handleSetActiveComponent("nozel")}
+        />
       )}
 
       {hotspots.map((hotspot) => (

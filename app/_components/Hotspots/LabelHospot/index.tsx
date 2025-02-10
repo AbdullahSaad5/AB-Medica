@@ -9,16 +9,35 @@ type HotspotProps = {
   onClick?: () => void;
   label?: string; // New prop for the label text
   show?: boolean;
+  positionAdjustments?: [number, number, number];
 };
 
-const Label = ({ position, groupRef, occlude = false, onClick, label = "Hotspot", show = true }: HotspotProps) => {
+const Label = ({
+  position,
+  groupRef,
+  occlude = false,
+  onClick,
+  label = "Hotspot",
+  show = true,
+  positionAdjustments,
+}: HotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   if (!show) return;
 
+  const finalCalculatedPosition = (
+    positionAdjustments
+      ? [
+          position[0] + positionAdjustments[0],
+          position[1] + positionAdjustments[1],
+          position[2] + positionAdjustments[2],
+        ]
+      : position
+  ) as [number, number, number];
+
   return (
     <Html
-      position={position}
+      position={finalCalculatedPosition}
       center
       distanceFactor={2}
       occlude={groupRef && occlude ? [groupRef] : undefined}

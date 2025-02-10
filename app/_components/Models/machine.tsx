@@ -2,7 +2,7 @@ import { useGLTF } from "@react-three/drei";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
-import ClickableHotspot from "../Hotspots/ButtonHotspot";
+import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { useAnimationMixer } from "@/app/hooks/useAnimationMixer";
@@ -45,12 +45,12 @@ const Machine = () => {
       <primitive ref={modelRef} object={result.scene} />
       {!activeComponent && (
         <>
-          <ClickableHotspot
+          <ClickableHotSpot
             position={[0.1, 1, 0.1]}
             groupRef={groupRef}
             onClick={() => handleSetActiveComponent("machine")}
           />
-          <ClickableHotspot
+          <ClickableHotSpot
             position={[-0.1, 1, 0.1]}
             groupRef={groupRef}
             onClick={() => handleSetActiveComponent("device")}
