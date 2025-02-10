@@ -23,7 +23,9 @@ const Scene = () => {
 
       // Update OrbitControls target
       if (controlsRef.current) {
+        // @ts-expect-error target is private
         controlsRef.current.target.set(center.x, center.y, center.z);
+        // @ts-expect-error update is private
         controlsRef.current.update();
       }
 
@@ -52,7 +54,9 @@ const Scene = () => {
 
       // Adjust OrbitControls zoom constraints dynamically
       if (controlsRef.current) {
+        // @ts-expect-error minDistance is private
         controlsRef.current.minDistance = maxSize * 0.8;
+        // @ts-expect-error maxDistance is private
         controlsRef.current.maxDistance = maxSize * 2.5;
       }
     }
