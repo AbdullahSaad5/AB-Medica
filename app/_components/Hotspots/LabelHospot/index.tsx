@@ -19,7 +19,7 @@ const Label = ({
   onClick,
   label = "Hotspot",
   show = true,
-  positionAdjustments,
+  positionAdjustments = [0, 0.01, 0],
 }: HotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
 

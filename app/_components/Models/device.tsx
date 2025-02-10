@@ -26,6 +26,7 @@ const Device = () => {
       {
         name: "SFERA",
         label: "Sfera",
+        positionAdjustments: [0.013, 0.01, 0],
       },
       {
         name: "VENTOLA_1",
@@ -50,10 +51,11 @@ const Device = () => {
 
       {hotspots.map((hotspot) => (
         <LabelHostpot
-        show={isActive}
+          show={isActive}
           key={hotspot.name}
           label={hotspot.name}
           position={hotspot.position}
+          positionAdjustments={hotspot.positionAdjustments}
           groupRef={groupRef}
           onClick={() => handleSetActiveComponent("device")}
         />
