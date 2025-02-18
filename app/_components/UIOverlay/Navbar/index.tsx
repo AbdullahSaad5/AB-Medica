@@ -18,7 +18,7 @@ const Navbar = () => {
       },
       {
         label: "Benefici",
-        href: "/benefici",
+        href: "/benefits",
       },
     ],
     []
