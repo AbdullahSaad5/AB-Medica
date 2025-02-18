@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import "./globals.css";
+import Navbar from "./_components/UIOverlay/Navbar";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
@@ -20,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${urbanist.variable} antialiased`}>{children}</body>
+      <body className={`${urbanist.variable} antialiased min-h-screen h-full w-full bg-red-50`}>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

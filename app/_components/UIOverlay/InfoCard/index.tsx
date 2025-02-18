@@ -16,7 +16,7 @@ const InfoCard = () => {
     },
   ];
   return (
-    <div className="mt-8 flex w-full justify-end">
+    <div className="mt-[calc(10vh+2rem)] flex w-full justify-end">
       <div className="w-[30%] bg-white/75  rounded-3xl shadow-lg p-6 space-y-3">
         <p className="text-3xl text-primary font-bold">Dolphon</p>
         <p className="text-lg text-black">
