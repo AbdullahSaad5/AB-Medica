@@ -2,6 +2,7 @@ import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei
 import { useRef, useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { EffectComposer, Vignette } from "@react-three/postprocessing";
 import Stand from "../Models/stand";
 import Nozel from "../Models/nozel";
 import Machine from "../Models/machine";
@@ -16,12 +17,10 @@ const Scene = () => {
 
   useEffect(() => {
     if (groupRef.current) {
-      // Compute bounding box
       const box = new THREE.Box3().setFromObject(groupRef.current);
       const center = new THREE.Vector3();
       box.getCenter(center);
 
-      // Update OrbitControls target
       if (controlsRef.current) {
         // @ts-expect-error target is private
         controlsRef.current.target.set(center.x, center.y, center.z);
@@ -29,11 +28,9 @@ const Scene = () => {
         controlsRef.current.update();
       }
 
-      // Adjust camera position relative to model size
       const size = box.getSize(new THREE.Vector3());
       const maxSize = Math.max(size.x, size.y, size.z);
 
-      // Dynamically adjust zoom levels
       const zoomFactor =
         activeComponent === "stand"
           ? 1.5
@@ -52,10 +49,9 @@ const Scene = () => {
       );
       camera.lookAt(center);
 
-      // Adjust OrbitControls zoom constraints dynamically
       if (controlsRef.current) {
         // @ts-expect-error minDistance is private
-        controlsRef.current.minDistance = maxSize * 0.8;
+        controlsRef.current.minDistance = maxSize * 0.35;
         // @ts-expect-error maxDistance is private
         controlsRef.current.maxDistance = maxSize * 2.5;
       }
@@ -65,7 +61,7 @@ const Scene = () => {
   return (
     <>
       <PerspectiveCamera makeDefault fov={50} />
-      <ambientLight intensity={0.2} />
+      <ambientLight intensity={1} />
       <color attach="background" args={["#31a2d6"]} />
 
       <group ref={groupRef}>
@@ -87,8 +83,23 @@ const Scene = () => {
         )}
       </group>
 
-      <OrbitControls ref={controlsRef} enablePan={false} />
+      <OrbitControls
+        ref={controlsRef}
+        enablePan={false}
+        dampingFactor={0.1}
+        zoomSpeed={1}
+        minPolarAngle={0.3}
+        maxPolarAngle={Math.PI / 1.1}
+      />
       <Environment preset="city" />
+
+      <EffectComposer>
+        <Vignette
+          offset={0.5} // Distance of the vignette effect from the center
+          darkness={0.5} // Intensity of the vignette effect
+          eskil={false} // Use Eskil's vignette algorithm
+        />
+      </EffectComposer>
     </>
   );
 };

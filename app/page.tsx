@@ -4,17 +4,19 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import Scene from "./_components/Scene";
 import ActiveComponentProvider from "./providers/ActiveComponentProvider";
+import UIOverlay from "./_components/UIOverlay";
 
 export default function Home() {
   return (
-    <div className="h-screen bg-white">
-      <ActiveComponentProvider>
-        <Canvas shadows>
-          <Suspense fallback="Loading...">
+    <div className="h-screen bg-white relative">
+      <Suspense fallback="Loading...">
+        <ActiveComponentProvider>
+          <UIOverlay />
+          <Canvas shadows>
             <Scene />
-          </Suspense>
-        </Canvas>
-      </ActiveComponentProvider>
+          </Canvas>
+        </ActiveComponentProvider>
+      </Suspense>
     </div>
   );
 }

@@ -13,11 +13,11 @@ type HotspotProps = {
 const Hotspot = ({ position, groupRef, occlude = false, onClick }: HotspotProps) => {
   return (
     <Html
-      position={position} // Adjust these values to position the hotspot
+      position={position}
       center
-      distanceFactor={2} // Adjusts size based on camera distance
-      occlude={groupRef && occlude ? [groupRef] : undefined} // Makes the button disappear when model blocks it
-      className="pointer-events-auto" // Ensures button is clickable
+      distanceFactor={0.5} // Increased from 2 to 8 for more dramatic scaling
+      occlude={groupRef && occlude ? [groupRef] : undefined}
+      className="pointer-events-auto"
     >
       <button
         onClick={() => {
@@ -27,11 +27,11 @@ const Hotspot = ({ position, groupRef, occlude = false, onClick }: HotspotProps)
           }
           console.log("Hotspot clicked!");
         }}
-        className="p-3 bg-[#c9ed08] text-white rounded-lg
-                               hover:bg-blue-600 transition-colors duration-200
-                               shadow-lg"
+        className="p-3 bg-secondary text-white rounded-lg
+                   hover:bg-secondaryHover hover:opacity-75 transition-all duration-200
+                   shadow-lg"
       >
-        <Plus size={30} strokeWidth={2} color="#0038a7" />
+        <Plus size={30} strokeWidth={2} className="text-primary" />
       </button>
     </Html>
   );

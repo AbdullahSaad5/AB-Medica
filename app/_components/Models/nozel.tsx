@@ -108,7 +108,7 @@ const Nozel = () => {
 
       {!activeComponent && (
         <ClickableHotSpot
-          position={[0, 1, 0.3]}
+          position={[0.17, 0.96, 0.3]}
           groupRef={groupRef}
           onClick={() => handleSetActiveComponent("nozel")}
         />

@@ -47,7 +47,7 @@ const Label = ({
         {/* Label that appears on hover */}
         {isHovered && (
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap">
-            <div className="bg-[#c9ed08] text-[#012e87] px-2 py-1 rounded shadow-lg text-sm">{label}</div>
+            <div className="bg-secondary text-primary px-2 py-1 rounded shadow-lg text-sm">{label}</div>
             {/* Triangle pointer */}
             <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#c9ed08]/90 mx-auto" />
           </div>
@@ -64,7 +64,7 @@ const Label = ({
           }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="bg-transparent border-2 border-[#c9ed08] rounded-full p-0.5 hover:border-[#d4f31a] transition-colors duration-200"
+          className="bg-transparent border-2 border-secondary rounded-full p-0.5 hover:border-secondaryHover transition-colors duration-200"
         />
       </div>
     </Html>
