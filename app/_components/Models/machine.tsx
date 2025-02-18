@@ -51,7 +51,7 @@ const Machine = () => {
             onClick={() => handleSetActiveComponent("machine")}
           />
           <ClickableHotSpot
-            position={[-0.1, 1.03, 0.07]}
+            position={[-0.095, 1.032, 0.07]}
             groupRef={groupRef}
             onClick={() => handleSetActiveComponent("device")}
           />
