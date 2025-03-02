@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Setup = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -9,6 +11,7 @@ const Setup = () => {
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const videoRef = useRef<HTMLVideoElement>(null);
   const preloadedImages = useRef<HTMLImageElement[]>([]);
+  const router = useRouter();
 
   const images = [
     "/assets/images/Vista iniziale-1.png",
@@ -58,6 +61,9 @@ const Setup = () => {
   };
 
   const handleNext = () => {
+    if (currentIndex === images.length - 1) {
+      router.push("/benefits");
+    }
     if (!showingVideo && currentIndex < images.length - 1) {
       setDirection("forward");
       setShowingVideo(true);
@@ -112,21 +118,22 @@ const Setup = () => {
       )}
 
       {/* Navigation Controls */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+      <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
         <div className="flex justify-between">
           <button
-            className="bg-primary text-white font-bold px-4 py-2 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handlePrevious}
             disabled={currentIndex === 0 || showingVideo}
           >
-            Previous
+            <ArrowLeft className="w-14 h-14 text-white" />
           </button>
           <button
-            className="bg-primary text-white font-bold px-4 py-2 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleNext}
-            disabled={currentIndex === images.length - 1 || showingVideo}
+            // disabled={currentIndex === images.length - 1 || showingVideo}
+            disabled={showingVideo}
           >
-            Next
+            <ArrowRight className="w-14 h-14 text-white" />
           </button>
         </div>
       </div>
