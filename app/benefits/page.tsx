@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import FullScreenVideo from "../_components/FullScreenVideo";
 import NumberHotspot from "../_components/Hotspots/NumberHotspot";
 import VideoPlayer from "../_components/VideoPlayer";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Hotspot = {
   x: number;
@@ -22,6 +24,7 @@ const Benefits = () => {
   const [isPlayingReverse, setIsPlayingReverse] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const videoInstance = videoRef.current;
@@ -180,6 +183,22 @@ const Benefits = () => {
           handleCloseModal={() => setModalOpen(false)}
           handleVideoEnd={handleVideoEnd}
         />
+      )}
+
+      {!isFullscreenPlaying && (
+        <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
+          <div className="flex justify-between">
+            <button
+              className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
+              onClick={() => {
+                router.push("/setup");
+              }}
+              aria-label="Close video"
+            >
+              <ArrowLeft className="w-14 h-14 text-white group-hover:text-primary" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
