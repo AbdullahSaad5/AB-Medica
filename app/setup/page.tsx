@@ -107,7 +107,7 @@ const Setup = () => {
             if (direction === "forward") {
               setTimeout(() => {
                 setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
-              }, 100);
+              }, 50);
             }
           }}
           onEnded={handleVideoEnd}
