@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 const Setup = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showingVideo, setShowingVideo] = useState(false);
-  const [direction, setDirection] = useState("forward");
-  const videoRef = useRef(null);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const preloadedImages = useRef<HTMLImageElement[]>([]);
 
   const images = [
     "/assets/images/Vista iniziale-1.png",
@@ -43,6 +44,19 @@ const Setup = () => {
     "/assets/videos/backwards/s7 back compr.mp4",
   ];
 
+  useEffect(() => {
+    // Preload images
+    images.forEach((src, index) => {
+      const img = new window.Image();
+      img.src = src;
+      preloadedImages.current[index] = img;
+    });
+  }, []);
+
+  const getCurrentVideo = () => {
+    return direction === "forward" ? forwardVideos[currentIndex] : backwardVideos[currentIndex];
+  };
+
   const handleNext = () => {
     if (!showingVideo && currentIndex < images.length - 1) {
       setDirection("forward");
@@ -61,43 +75,43 @@ const Setup = () => {
 
   const handleVideoEnd = () => {
     setShowingVideo(false);
-    if (direction === "forward") {
-      setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
-    }
-  };
-
-  const getCurrentVideo = () => {
-    if (direction === "forward") {
-      return forwardVideos[currentIndex];
-    } else {
-      return backwardVideos[currentIndex];
-    }
+    // if (direction === "forward") {
+    //   setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+    // }
   };
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {showingVideo ? (
-        <div className="absolute inset-0 w-full h-full">
-          <video
-            ref={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
-            autoPlay
-            onEnded={handleVideoEnd}
-          >
-            <source src={getCurrentVideo()} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      ) : (
-        <Image
-          src={images[currentIndex]}
-          alt={`Step ${currentIndex + 1}`}
-          fill
-          className="object-cover h-full w-full"
-          priority
-        />
+      {/* Background Image (Always Mounted) */}
+      <Image
+        src={images[currentIndex]}
+        alt={`Step ${currentIndex}`}
+        fill
+        className="object-cover h-full w-full transition-opacity duration-500"
+        priority
+      />
+
+      {/* Foreground Video (Only when Playing) */}
+      {showingVideo && (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          onPlay={() => {
+            if (direction === "forward") {
+              setTimeout(() => {
+                setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+              }, 100);
+            }
+          }}
+          onEnded={handleVideoEnd}
+        >
+          <source src={getCurrentVideo()} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       )}
 
+      {/* Navigation Controls */}
       <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
         <div className="flex justify-between">
           <button
