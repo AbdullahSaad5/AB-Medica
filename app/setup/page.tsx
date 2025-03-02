@@ -4,13 +4,16 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import LoadingScreen from "../_components/LoadingScreen";
 
 const Setup = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showingVideo, setShowingVideo] = useState(false);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const preloadedImages = useRef<HTMLImageElement[]>([]);
+  const preloadedVideos = useRef<HTMLVideoElement[]>([]);
   const router = useRouter();
 
   const images = [
@@ -48,11 +51,32 @@ const Setup = () => {
   ];
 
   useEffect(() => {
-    // Preload images
+    let loadedImages = 0;
+    let loadedVideos = 0;
+    const totalAssets = images.length + forwardVideos.length + backwardVideos.length;
+
     images.forEach((src, index) => {
       const img = new window.Image();
       img.src = src;
+      img.onload = () => {
+        loadedImages++;
+        if (loadedImages + loadedVideos === totalAssets) {
+          setIsLoading(false);
+        }
+      };
       preloadedImages.current[index] = img;
+    });
+
+    [...forwardVideos, ...backwardVideos].forEach((src, index) => {
+      const video = document.createElement("video");
+      video.src = src;
+      video.oncanplaythrough = () => {
+        loadedVideos++;
+        if (loadedImages + loadedVideos === totalAssets) {
+          setIsLoading(false);
+        }
+      };
+      preloadedVideos.current[index] = video;
     });
   }, []);
 
@@ -81,62 +105,61 @@ const Setup = () => {
 
   const handleVideoEnd = () => {
     setShowingVideo(false);
-    // if (direction === "forward") {
-    //   setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
-    // }
   };
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {/* Background Image (Always Mounted) */}
-      <Image
-        src={images[currentIndex]}
-        alt={`Step ${currentIndex}`}
-        fill
-        className="object-cover h-full w-full transition-opacity duration-500"
-        priority
-      />
+      {isLoading ? (
+        <LoadingScreen />
+      ) : (
+        <>
+          <Image
+            src={images[currentIndex]}
+            alt={`Step ${currentIndex}`}
+            fill
+            className="object-cover h-full w-full transition-opacity duration-500"
+            priority
+          />
 
-      {/* Foreground Video (Only when Playing) */}
-      {showingVideo && (
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          onPlay={() => {
-            if (direction === "forward") {
-              setTimeout(() => {
-                setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
-              }, 50);
-            }
-          }}
-          onEnded={handleVideoEnd}
-        >
-          <source src={getCurrentVideo()} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+          {showingVideo && (
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover"
+              autoPlay
+              onPlay={() => {
+                if (direction === "forward") {
+                  setTimeout(() => {
+                    setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+                  }, 50);
+                }
+              }}
+              onEnded={handleVideoEnd}
+            >
+              <source src={getCurrentVideo()} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
+
+          <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
+            <div className="flex justify-between">
+              <button
+                className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handlePrevious}
+                disabled={currentIndex === 0 || showingVideo}
+              >
+                <ArrowLeft className="w-14 h-14 text-white" />
+              </button>
+              <button
+                className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleNext}
+                disabled={showingVideo}
+              >
+                <ArrowRight className="w-14 h-14 text-white" />
+              </button>
+            </div>
+          </div>
+        </>
       )}
-
-      {/* Navigation Controls */}
-      <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
-        <div className="flex justify-between">
-          <button
-            className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0 || showingVideo}
-          >
-            <ArrowLeft className="w-14 h-14 text-white" />
-          </button>
-          <button
-            className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleNext}
-            // disabled={currentIndex === images.length - 1 || showingVideo}
-            disabled={showingVideo}
-          >
-            <ArrowRight className="w-14 h-14 text-white" />
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
