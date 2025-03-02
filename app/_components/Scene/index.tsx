@@ -108,7 +108,9 @@ const Scene = () => {
 
   // Add an effect to calculate and update zoom level
   useEffect(() => {
-    if (!controlsRef.current || !groupRef.current) return;
+    const controlsInstance = controlsRef.current;
+
+    if (!controlsInstance || !groupRef.current) return;
 
     // Function to calculate zoom level based on camera distance
     const calculateZoomLevel = () => {
@@ -122,15 +124,15 @@ const Scene = () => {
       // Calculate current distance from camera to target
       const distance = camera.position.distanceTo(
         // @ts-expect-error target is private
-        controlsRef.current.target
+        controlsInstance.target
       );
 
       // Calculate zoom level as a normalized value
       // 1 = fully zoomed out (maxDistance), 0 = fully zoomed in (minDistance)
       // @ts-expect-error minDistance and maxDistance are private
-      const minDist = controlsRef.current.minDistance || maxSize * 0.35;
+      const minDist = controlsInstance.minDistance || maxSize * 0.35;
       // @ts-expect-error minDistance and maxDistance are private
-      const maxDist = controlsRef.current.maxDistance || maxSize * 2.5;
+      const maxDist = controlsInstance.maxDistance || maxSize * 2.5;
 
       // Normalize distance to a 0-1 scale (inverted so zoom in = higher value)
       const normalizedZoom = 1 - (distance - minDist) / (maxDist - minDist);
@@ -148,16 +150,16 @@ const Scene = () => {
     };
 
     // @ts-expect-error addEventListener is private
-    controlsRef.current.addEventListener("change", handleControlsChange);
+    controlsInstance.addEventListener("change", handleControlsChange);
 
     // Clean up
     return () => {
-      if (controlsRef.current) {
+      if (controlsInstance) {
         // @ts-expect-error removeEventListener is private
-        controlsRef.current.removeEventListener("change", handleControlsChange);
+        controlsInstance.removeEventListener("change", handleControlsChange);
       }
     };
-  }, [camera, isInitialized]);
+  }, [camera, isInitialized, setZoomLevel]);
 
   return (
     <>
