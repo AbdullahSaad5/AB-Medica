@@ -1,3 +1,4 @@
+import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { Html } from "@react-three/drei";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -11,11 +12,13 @@ type HotspotProps = {
 };
 
 const Hotspot = ({ position, groupRef, occlude = false, onClick }: HotspotProps) => {
+  const { scaleFactor } = useActiveComponent();
+
   return (
     <Html
       position={position}
       center
-      distanceFactor={2} // Increased from 2 to 8 for more dramatic scaling
+      distanceFactor={scaleFactor}
       occlude={groupRef && occlude ? [groupRef] : undefined}
       className="pointer-events-auto"
     >

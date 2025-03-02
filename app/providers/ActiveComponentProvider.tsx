@@ -5,12 +5,18 @@ export type ActiveComponent = "stand" | "nozel" | "machine" | "device" | null;
 type ActiveComponentContextType = {
   activeComponent: ActiveComponent;
   handleSetActiveComponent: (component: ActiveComponent) => void;
+  zoomLevel: number;
+  setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
+  scaleFactor: number;
 };
 
 const ActiveComponentContext = React.createContext({} as ActiveComponentContextType);
 
 const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeComponent, setActiveComponent] = React.useState<ActiveComponent>(null);
+  const [zoomLevel, setZoomLevel] = React.useState(1);
+  const scaleFactor = 0.5 / zoomLevel;
+  const maxScale = 1.5;
 
   const handleSetActiveComponent = (component: ActiveComponent) => {
     if (activeComponent === component) {
@@ -25,6 +31,9 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
       value={{
         activeComponent,
         handleSetActiveComponent,
+        zoomLevel,
+        setZoomLevel,
+        scaleFactor: scaleFactor > maxScale ? maxScale : scaleFactor,
       }}
     >
       {children}

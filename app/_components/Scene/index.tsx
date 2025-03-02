@@ -13,7 +13,7 @@ const Scene = () => {
   const controlsRef = useRef(null);
   const groupRef = useRef<THREE.Group | null>(null);
   const { camera } = useThree();
-  const { activeComponent } = useActiveComponent();
+  const { activeComponent, setZoomLevel } = useActiveComponent();
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Define different camera angles/positions
@@ -29,7 +29,10 @@ const Scene = () => {
     if (!isInitialized && groupRef.current) {
       const initialView = defaultCameraView; // Change this to your preferred initial view
 
-      const box = new THREE.Box3().setFromObject(groupRef.current);
+      const box = new THREE.Box3();
+      if (groupRef.current) {
+        box.setFromObject(groupRef.current);
+      }
       const center = new THREE.Vector3();
       box.getCenter(center);
 
@@ -54,7 +57,10 @@ const Scene = () => {
   // This effect runs when activeComponent changes
   useEffect(() => {
     if (groupRef.current) {
-      const box = new THREE.Box3().setFromObject(groupRef.current);
+      const box = new THREE.Box3();
+      if (groupRef.current) {
+        box.setFromObject(groupRef.current);
+      }
       const center = new THREE.Vector3();
       box.getCenter(center);
 
@@ -95,10 +101,63 @@ const Scene = () => {
         // @ts-expect-error minDistance is private
         controlsRef.current.minDistance = maxSize * 0.35;
         // @ts-expect-error maxDistance is private
-        controlsRef.current.maxDistance = maxSize * 2.5;
+        controlsRef.current.maxDistance = maxSize * 1;
       }
     }
   }, [activeComponent, camera, isInitialized]);
+
+  // Add an effect to calculate and update zoom level
+  useEffect(() => {
+    if (!controlsRef.current || !groupRef.current) return;
+
+    // Function to calculate zoom level based on camera distance
+    const calculateZoomLevel = () => {
+      const box = new THREE.Box3();
+      if (groupRef.current) {
+        box.setFromObject(groupRef.current);
+      }
+      const size = box.getSize(new THREE.Vector3());
+      const maxSize = Math.max(size.x, size.y, size.z);
+
+      // Calculate current distance from camera to target
+      const distance = camera.position.distanceTo(
+        // @ts-expect-error target is private
+        controlsRef.current.target
+      );
+
+      // Calculate zoom level as a normalized value
+      // 1 = fully zoomed out (maxDistance), 0 = fully zoomed in (minDistance)
+      // @ts-expect-error minDistance and maxDistance are private
+      const minDist = controlsRef.current.minDistance || maxSize * 0.35;
+      // @ts-expect-error minDistance and maxDistance are private
+      const maxDist = controlsRef.current.maxDistance || maxSize * 2.5;
+
+      // Normalize distance to a 0-1 scale (inverted so zoom in = higher value)
+      const normalizedZoom = 1 - (distance - minDist) / (maxDist - minDist);
+
+      // Clamp between 0 and 1
+      return Math.max(0, Math.min(1, normalizedZoom));
+    };
+
+    // Initial calculation
+    setZoomLevel(calculateZoomLevel());
+
+    // Add event listener for OrbitControls change event
+    const handleControlsChange = () => {
+      setZoomLevel(calculateZoomLevel());
+    };
+
+    // @ts-expect-error addEventListener is private
+    controlsRef.current.addEventListener("change", handleControlsChange);
+
+    // Clean up
+    return () => {
+      if (controlsRef.current) {
+        // @ts-expect-error removeEventListener is private
+        controlsRef.current.removeEventListener("change", handleControlsChange);
+      }
+    };
+  }, [camera, isInitialized]);
 
   return (
     <>

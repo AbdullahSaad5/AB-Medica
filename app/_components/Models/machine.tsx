@@ -1,12 +1,12 @@
+import { useAnimationMixer } from "@/app/hooks/useAnimationMixer";
+import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
+import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { useGLTF } from "@react-three/drei";
-import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
 import type { Group } from "three";
 import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
-import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
-import { useAnimationMixer } from "@/app/hooks/useAnimationMixer";
-import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
 
 const Machine = () => {
   const result = useGLTF("./models/Corpo Dolphin.glb");
