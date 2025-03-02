@@ -34,7 +34,9 @@ const Navbar = () => {
     <div className="absolute top-4 left-4 right-4 rounded-3xl px-8 py-4 bg-white/75 z-10 pointer-events-auto h-[10vh] backdrop-blur-[.15em] shadow-[.1em_.17em_.17em_#0000004d]">
       <div className="flex justify-between items-stretch h-full">
         <div className="h-full relative w-56">
-          <Image src="/logo-ab-medica.png" alt="Logo" className="h-8 object-contain" fill />
+          <Link href="/">
+            <Image src="/logo-ab-medica.png" alt="Logo" className="h-8 object-contain" fill />
+          </Link>
         </div>
         <div className="h-full flex items-center space-x-8 text-lg">
           {buttons.map((button, index) => (

@@ -1,5 +1,5 @@
-import { X } from "lucide-react";
-import React from "react";
+import { ArrowLeft } from "lucide-react";
+import React, { useState } from "react";
 
 const FullScreenVideo = ({
   videoRef,
@@ -14,6 +14,8 @@ const FullScreenVideo = ({
   handleVideoEnd: () => void;
   showCloseButton: boolean;
 }) => {
+  const [disabled, setDisabled] = useState(false);
+
   return (
     <div className="absolute inset-0 z-10">
       <video
@@ -22,17 +24,28 @@ const FullScreenVideo = ({
         autoPlay
         muted
         playsInline
-        onEnded={handleVideoEnd}
+        onPlay={() => {
+          setDisabled(true);
+        }}
+        onEnded={() => {
+          setDisabled(false);
+          handleVideoEnd();
+        }}
         src={videoSrc}
       ></video>
       {showCloseButton && (
-        <button
-          onClick={handleCloseVideo}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-20"
-          aria-label="Close video"
-        >
-          <X className="w-6 h-6 text-white" />
-        </button>
+        <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
+          <div className="flex justify-between">
+            <button
+              className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleCloseVideo}
+              aria-label="Close video"
+              disabled={disabled}
+            >
+              <ArrowLeft className="w-14 h-14 text-white" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

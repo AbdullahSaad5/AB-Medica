@@ -140,7 +140,7 @@ const Benefits = () => {
       {/* Base background image */}
       {(!isFullscreenPlaying || !selectedHotspot) && (
         <Image
-          src={"/assets/images/0334.png"}
+          src={"/assets/images/SCHERMATA PRINCIPALE BENEFICI.png"}
           alt={`Vista iniziale-1.png`}
           fill
           className="object-cover h-full w-full"
