@@ -38,14 +38,14 @@ const Label = ({
     <Html
       position={finalCalculatedPosition}
       center
-      distanceFactor={2}
+      distanceFactor={1}
       occlude={groupRef && occlude ? [groupRef] : undefined}
       className="pointer-events-auto"
     >
       <div className="relative">
         {/* Label that appears on hover */}
         {isHovered && (
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap">
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap select-none">
             <div className="bg-secondary text-primary px-2 py-1 rounded shadow-lg text-sm">{label}</div>
             {/* Triangle pointer */}
             <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#c9ed08]/90 mx-auto" />
@@ -53,10 +53,10 @@ const Label = ({
         )}
 
         {/* Hotspot button */}
-        <button
+        <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="bg-transparent border-2 border-secondary rounded-full p-0.5 hover:border-secondaryHover transition-colors duration-200"
+          className="cursor-default bg-transparent border-2 border-secondary rounded-full p-0.5 hover:border-secondaryHover transition-colors duration-200"
         />
       </div>
     </Html>

@@ -72,7 +72,12 @@ const Scene = () => {
       }
 
       const size = box.getSize(new THREE.Vector3());
-      const maxSize = Math.max(size.x, size.y, size.z);
+      let maxSize;
+      if (activeComponent === "device") {
+        maxSize = Math.max(size.x, size.y, size.z) * 2.5;
+      } else {
+        maxSize = Math.max(size.x, size.y, size.z);
+      }
 
       // Only adjust camera if we've already initialized and component changes
       if (isInitialized) {
@@ -82,9 +87,9 @@ const Scene = () => {
             : activeComponent === "nozel"
             ? 1.2
             : activeComponent === "machine"
-            ? 5
+            ? 2
             : activeComponent === "device"
-            ? 1.8
+            ? 2.5
             : 1;
 
         if (activeComponent) {
@@ -101,7 +106,7 @@ const Scene = () => {
         // @ts-expect-error minDistance is private
         controlsRef.current.minDistance = maxSize * 0.35;
         // @ts-expect-error maxDistance is private
-        controlsRef.current.maxDistance = maxSize * 1;
+        controlsRef.current.maxDistance = maxSize * 2.5;
       }
     }
   }, [activeComponent, camera, isInitialized]);
