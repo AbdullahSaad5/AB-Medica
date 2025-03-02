@@ -31,7 +31,7 @@ const InfoCard = () => {
     {
       text: "Brochure",
       resourceType: "pdf",
-      src: "/assets/pdfs/Brochure.pdf",
+      src: "/assets/pdfs/Brochure Dolphin ITA (1)_compressed.pdf",
     },
     {
       text: "Glossario",
