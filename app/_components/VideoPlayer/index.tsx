@@ -3,21 +3,17 @@ import React from "react";
 
 const VideoPlayer = ({
   videoRef,
-  // selectedHotspot,
   videoSrc,
-  //   setModalOpen,
   handleCloseModal,
   handleVideoEnd,
 }: {
   videoRef: React.RefObject<HTMLVideoElement>;
   videoSrc: string;
-  // selectedHotspot: {video: string},
-  //   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   handleCloseModal: () => void;
   handleVideoEnd: () => void;
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center pointer-events-auto">
       <div className="w-4/5 relative">
         <button
           onClick={() => handleCloseModal()}
@@ -28,14 +24,7 @@ const VideoPlayer = ({
         </button>
 
         <div className="w-full relative">
-          <video
-            ref={videoRef}
-            className="w-full h-auto rounded-lg"
-            autoPlay
-            muted
-            playsInline
-            onEnded={handleVideoEnd}
-          >
+          <video ref={videoRef} className="w-full h-auto rounded-lg" autoPlay playsInline onEnded={handleVideoEnd}>
             <source src={videoSrc} type="video/mp4" />
           </video>
         </div>

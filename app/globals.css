@@ -6,6 +6,7 @@
   --background: #ffffff;
   --foreground: #171717;
   --primary: #012e87;
+  --primary-hover: #0d4df2;
   --secondary: #c9ed08;
   --secondary-hover: #d4f31a;
 }
@@ -27,4 +28,26 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* style the scrollbars */
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+  border-radius: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
 }

@@ -1,18 +1,47 @@
-import React from "react";
+"use client";
+
+import React, { useRef, useState } from "react";
+import VideoPlayer from "../../VideoPlayer";
+import PDFViewer from "../../PDFViewer";
+
+type Button = {
+  text: string;
+  resourceType: "video" | "pdf";
+  src: string;
+};
 
 const InfoCard = () => {
-  const buttons = [
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedButton, setSelectedButton] = useState<Button | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleVideoEnd = () => {
+    if (selectedButton?.resourceType === "video") {
+      setModalOpen(false);
+      setSelectedButton(null);
+    }
+  };
+
+  const buttons: Button[] = [
     {
       text: "Teaser",
+      resourceType: "video",
+      src: "/assets/videos/TRAILER FINAL V7 16.12_LQ2.mp4",
     },
     {
       text: "Brochure",
+      resourceType: "pdf",
+      src: "/assets/pdfs/Brochure.pdf",
     },
     {
       text: "Glossario",
+      resourceType: "pdf",
+      src: "/assets/pdfs/AB Medica Mockup brochure_compressed.pdf",
     },
     {
       text: "Manuale d'uso",
+      resourceType: "pdf",
+      src: "/assets/pdfs/MU 1 03 01 01 REV.01.pdf",
     },
   ];
   return (
@@ -27,6 +56,10 @@ const InfoCard = () => {
           {buttons.map((button, index) => (
             <button
               key={index}
+              onClick={() => {
+                setSelectedButton(button);
+                setModalOpen(true);
+              }}
               className="bg-secondary text-[1.85vh] text-primary font-semibold px-4 py-1 rounded-[0.75rem] shadow-custom hover:shadow-custom-hovered transition-all"
             >
               {button.text}
@@ -34,6 +67,21 @@ const InfoCard = () => {
           ))}
         </div>
       </div>
+      {modalOpen && selectedButton && selectedButton.resourceType === "video" && (
+        <VideoPlayer
+          videoRef={videoRef}
+          videoSrc={selectedButton?.src as string}
+          handleCloseModal={() => setModalOpen(false)}
+          handleVideoEnd={handleVideoEnd}
+        />
+      )}
+      {modalOpen && selectedButton && selectedButton.resourceType === "pdf" && (
+        <PDFViewer
+          // pdfUrl={"https://cdn.filestackcontent.com/wcrjf9qPTCKXV3hMXDwK"}
+          pdfUrl={selectedButton?.src as string}
+          handleCloseModal={() => setModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
