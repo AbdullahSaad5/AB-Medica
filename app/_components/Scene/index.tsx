@@ -1,5 +1,5 @@
-import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
-import { useRef, useEffect } from "react";
+import { Environment, Html, OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { EffectComposer, Vignette } from "@react-three/postprocessing";
@@ -14,7 +14,44 @@ const Scene = () => {
   const groupRef = useRef<THREE.Group | null>(null);
   const { camera } = useThree();
   const { activeComponent } = useActiveComponent();
+  const [isInitialized, setIsInitialized] = useState(false);
 
+  // Define different camera angles/positions
+  const defaultCameraView = useMemo(() => {
+    return {
+      position: new THREE.Vector3(-0.6, 0.1, 0.8),
+      target: new THREE.Vector3(0, 0, 0),
+    };
+  }, []);
+
+  // Set initial camera position (runs once)
+  useEffect(() => {
+    if (!isInitialized && groupRef.current) {
+      const initialView = defaultCameraView; // Change this to your preferred initial view
+
+      const box = new THREE.Box3().setFromObject(groupRef.current);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Set camera position relative to the center of the object
+      camera.position.set(
+        center.x + initialView.position.x,
+        center.y + initialView.position.y,
+        center.z + initialView.position.z
+      );
+
+      if (controlsRef.current) {
+        // @ts-expect-error target is private
+        controlsRef.current.target.set(center.x, center.y, center.z);
+        // @ts-expect-error update is private
+        controlsRef.current.update();
+      }
+
+      setIsInitialized(true);
+    }
+  }, [camera, isInitialized, defaultCameraView]);
+
+  // This effect runs when activeComponent changes
   useEffect(() => {
     if (groupRef.current) {
       const box = new THREE.Box3().setFromObject(groupRef.current);
@@ -31,23 +68,28 @@ const Scene = () => {
       const size = box.getSize(new THREE.Vector3());
       const maxSize = Math.max(size.x, size.y, size.z);
 
-      const zoomFactor =
-        activeComponent === "stand"
-          ? 1.5
-          : activeComponent === "nozel"
-          ? 1.2
-          : activeComponent === "machine"
-          ? 1.5
-          : activeComponent === "device"
-          ? 1.8
-          : 1;
+      // Only adjust camera if we've already initialized and component changes
+      if (isInitialized) {
+        const zoomFactor =
+          activeComponent === "stand"
+            ? 1.5
+            : activeComponent === "nozel"
+            ? 1.2
+            : activeComponent === "machine"
+            ? 1.5
+            : activeComponent === "device"
+            ? 1.8
+            : 1;
 
-      camera.position.set(
-        center.x + maxSize * zoomFactor,
-        center.y + maxSize * zoomFactor,
-        center.z + maxSize * zoomFactor
-      );
-      camera.lookAt(center);
+        if (activeComponent) {
+          camera.position.set(
+            center.x + maxSize * zoomFactor,
+            center.y + maxSize * zoomFactor,
+            center.z + maxSize * zoomFactor
+          );
+          camera.lookAt(center);
+        }
+      }
 
       if (controlsRef.current) {
         // @ts-expect-error minDistance is private
@@ -56,13 +98,24 @@ const Scene = () => {
         controlsRef.current.maxDistance = maxSize * 2.5;
       }
     }
-  }, [activeComponent, camera]);
+  }, [activeComponent, camera, isInitialized]);
 
   return (
     <>
       <PerspectiveCamera makeDefault fov={50} />
       <ambientLight intensity={1} />
       <color attach="background" args={["#31a2d6"]} />
+      <Html position={[0, 1, 0]}>
+        <button
+          onClick={() => {
+            console.log("Camera X", camera.position.x);
+            console.log("Camera Y", camera.position.y);
+            console.log("Camera Z", camera.position.z);
+          }}
+        >
+          Print Camera Indexes
+        </button>
+      </Html>
 
       <group ref={groupRef}>
         {!activeComponent ? (

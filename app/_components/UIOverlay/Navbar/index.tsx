@@ -9,7 +9,7 @@ const Navbar = () => {
   const buttons = useMemo(
     () => [
       {
-        label: "Technologia",
+        label: "Tecnologia",
         href: "/",
       },
       {
@@ -31,7 +31,7 @@ const Navbar = () => {
   const activeTab = buttons.find((button) => button.href === route)?.label;
 
   return (
-    <div className="absolute top-4 left-4 right-4 rounded-3xl px-8 py-4 bg-white/75 z-10 pointer-events-auto h-[10vh] backdrop-blur-[2px] shadow-lg">
+    <div className="absolute top-4 left-4 right-4 rounded-3xl px-8 py-4 bg-white/75 z-10 pointer-events-auto h-[10vh] backdrop-blur-[.15em] shadow-[.1em_.17em_.17em_#0000004d]">
       <div className="flex justify-between items-stretch h-full">
         <div className="h-full relative w-56">
           <Image src="/logo-ab-medica.png" alt="Logo" className="h-8 object-contain" fill />
@@ -42,7 +42,7 @@ const Navbar = () => {
               href={button.href}
               key={index}
               // onClick={button.onClick}
-              className={`px-4 py-2 rounded-xl ${
+              className={`px-[1vw] py-[1vh] rounded-xl text-[2.25vh] ${
                 activeTab === button.label ? "bg-primary text-white" : "bg-transparent text-primary"
               }`}
             >
