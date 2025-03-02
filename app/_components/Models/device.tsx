@@ -11,7 +11,7 @@ const Device = () => {
   const result = useGLTF("./models/dolphin_cartuccia.glb");
   const groupRef = useRef<Group>(null);
   const modelRef = useRef<Group>(null);
-  const { handleSetActiveComponent, activeComponent } = useActiveComponent();
+  const { activeComponent } = useActiveComponent();
   const isActive = activeComponent === "device";
 
   const { mixer, isAnimationPlaying } = useAnimationMixer({
@@ -57,7 +57,6 @@ const Device = () => {
           position={hotspot.position}
           positionAdjustments={hotspot.positionAdjustments}
           groupRef={groupRef}
-          onClick={() => handleSetActiveComponent("device")}
         />
       ))}
     </group>

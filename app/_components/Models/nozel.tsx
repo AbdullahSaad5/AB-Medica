@@ -121,7 +121,6 @@ const Nozel = () => {
           label={hotspot.name}
           position={hotspot.position}
           groupRef={groupRef}
-          onClick={() => handleSetActiveComponent("nozel")}
         />
       ))}
     </group>

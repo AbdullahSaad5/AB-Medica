@@ -16,7 +16,6 @@ const Label = ({
   position,
   groupRef,
   occlude = false,
-  onClick,
   label = "Hotspot",
   show = true,
   positionAdjustments = [0, 0.01, 0],
@@ -55,13 +54,6 @@ const Label = ({
 
         {/* Hotspot button */}
         <button
-          onClick={() => {
-            if (onClick) {
-              onClick();
-              return;
-            }
-            console.log("Hotspot clicked!");
-          }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           className="bg-transparent border-2 border-secondary rounded-full p-0.5 hover:border-secondaryHover transition-colors duration-200"

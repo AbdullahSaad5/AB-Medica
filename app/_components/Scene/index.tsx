@@ -82,7 +82,7 @@ const Scene = () => {
             : activeComponent === "nozel"
             ? 1.2
             : activeComponent === "machine"
-            ? 1.5
+            ? 5
             : activeComponent === "device"
             ? 1.8
             : 1;
