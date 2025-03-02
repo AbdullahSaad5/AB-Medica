@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect, useRef } from "react";
-import { cn } from "../utils/cn";
-import { X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import FullScreenVideo from "../_components/FullScreenVideo";
+import NumberHotspot from "../_components/Hotspots/NumberHotspot";
+import VideoPlayer from "../_components/VideoPlayer";
 
 type Hotspot = {
   x: number;
@@ -23,25 +24,27 @@ const Benefits = () => {
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (modalOpen && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
+    const videoInstance = videoRef.current;
+    if (modalOpen && videoInstance) {
+      videoInstance.currentTime = 0;
+      videoInstance.play();
     }
     return () => {
-      if (videoRef.current) {
-        videoRef.current.pause();
+      if (videoInstance) {
+        videoInstance.pause();
       }
     };
   }, [modalOpen]);
 
   useEffect(() => {
-    if (isFullscreenPlaying && fullscreenVideoRef.current) {
-      fullscreenVideoRef.current.currentTime = 0;
-      fullscreenVideoRef.current.play();
+    const fullscreenVideoInstance = fullscreenVideoRef.current;
+    if (isFullscreenPlaying && fullscreenVideoInstance) {
+      fullscreenVideoInstance.currentTime = 0;
+      fullscreenVideoInstance.play();
     }
     return () => {
-      if (fullscreenVideoRef.current) {
-        fullscreenVideoRef.current.pause();
+      if (fullscreenVideoInstance) {
+        fullscreenVideoInstance.pause();
       }
     };
   }, [isFullscreenPlaying]);
@@ -148,75 +151,35 @@ const Benefits = () => {
 
       {/* Fullscreen video background */}
       {isFullscreenPlaying && selectedHotspot && (
-        <div className="absolute inset-0 z-10">
-          <video
-            ref={fullscreenVideoRef}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            playsInline
-            onEnded={handleVideoEnd}
-            src={isPlayingReverse ? selectedHotspot.reverseVideo : selectedHotspot.video}
-          ></video>
-          {!isPlayingReverse && (
-            <button
-              onClick={handleCloseFullscreen}
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-20"
-              aria-label="Close video"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
-          )}
-        </div>
+        <FullScreenVideo
+          videoRef={fullscreenVideoRef}
+          videoSrc={(isPlayingReverse ? selectedHotspot.reverseVideo : selectedHotspot.video) as string}
+          handleCloseVideo={handleCloseFullscreen}
+          handleVideoEnd={handleVideoEnd}
+          showCloseButton={!isPlayingReverse}
+        />
       )}
 
       {/* Hotspots */}
       {!isFullscreenPlaying &&
         hotspots.map((hotspot, index) => (
-          <div
-            key={index}
-            className={cn(
-              "w-[60px] h-[60px] rounded-full border-4 border-white absolute grid place-items-center cursor-pointer",
-              hotspot.color === "white"
-                ? "border-white hover:bg-primary hover:border-primary"
-                : "border-secondary hover:bg-secondary hover:text-primary"
-            )}
-            style={{
-              top: `${hotspot.y}%`,
-              left: `${hotspot.x}%`,
-            }}
+          <NumberHotspot
+            color={hotspot.color}
+            number={index + 1}
             onClick={() => handleHotspotClick(index)}
-          >
-            <p className="text-2xl font-bold">{index + 1}</p>
-          </div>
+            position={{ x: hotspot.x, y: hotspot.y }}
+            key={index}
+          />
         ))}
 
       {/* Modal for non-fullscreen videos */}
       {modalOpen && selectedHotspot && selectedHotspot.displayMode === "modal" && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="w-4/5 relative">
-            <button
-              onClick={() => setModalOpen(false)}
-              className="absolute -top-12 right-0 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-              aria-label="Close modal"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
-
-            <div className="w-full relative">
-              <video
-                ref={videoRef}
-                className="w-full h-auto rounded-lg"
-                autoPlay
-                muted
-                playsInline
-                onEnded={handleVideoEnd}
-              >
-                <source src={selectedHotspot.video} type="video/mp4" />
-              </video>
-            </div>
-          </div>
-        </div>
+        <VideoPlayer
+          videoRef={videoRef}
+          videoSrc={selectedHotspot.video}
+          handleCloseModal={() => setModalOpen(false)}
+          handleVideoEnd={handleVideoEnd}
+        />
       )}
     </div>
   );

@@ -17,6 +17,7 @@ const Hotspot = ({ position, groupRef, occlude = false, onClick }: HotspotProps)
   return (
     <Html
       position={position}
+      zIndexRange={[0, 0]}
       center
       distanceFactor={scaleFactor}
       occlude={groupRef && occlude ? [groupRef] : undefined}

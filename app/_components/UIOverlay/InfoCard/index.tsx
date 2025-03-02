@@ -16,15 +16,19 @@ const InfoCard = () => {
     },
   ];
   return (
-    <div className="mt-[calc(10vh+2rem)] flex w-full justify-end">
-      <div className="w-[30%] bg-white/75  rounded-3xl shadow-lg p-6 space-y-3">
-        <p className="text-3xl text-primary font-bold">Dolphon</p>
-        <p className="text-lg text-black">
-          Dolphin è un dispositivo medico brevettato per l’interventistica laparoscopica, mini-laparoscopica e robotica.
+    <div className="mt-[calc(10vh+2rem)] flex w-full justify-end z-10">
+      <div className="w-[35vw] bg-white/75  rounded-3xl shadow-lg py-[2vh] px-[2.2vw] space-y-3  pointer-events-auto">
+        <p className="text-[36px] text-primary font-semibold">Dolphin</p>
+        <p className="text-[2.2vh] text-black">
+          Dolphin è un dispositivo medico brevettato per l&apos;interventistica laparoscopica, mini-laparoscopica e
+          robotica.{" "}
         </p>
         <div className="flex items-center justify-center flex-wrap gap-4 ">
           {buttons.map((button, index) => (
-            <button key={index} className="bg-secondary text-primary font-semibold px-4 py-2 rounded-lg shadow-lg">
+            <button
+              key={index}
+              className="bg-secondary text-[1.85vh] text-primary font-semibold px-4 py-1 rounded-[0.75rem] shadow-custom hover:shadow-custom-hovered transition-all"
+            >
               {button.text}
             </button>
           ))}
