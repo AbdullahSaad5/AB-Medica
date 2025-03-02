@@ -15,7 +15,7 @@ const Hotspot = ({ position, groupRef, occlude = false, onClick }: HotspotProps)
     <Html
       position={position}
       center
-      distanceFactor={0.5} // Increased from 2 to 8 for more dramatic scaling
+      distanceFactor={2} // Increased from 2 to 8 for more dramatic scaling
       occlude={groupRef && occlude ? [groupRef] : undefined}
       className="pointer-events-auto"
     >

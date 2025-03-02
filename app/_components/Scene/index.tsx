@@ -1,4 +1,4 @@
-import { Environment, Html, OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -19,7 +19,7 @@ const Scene = () => {
   // Define different camera angles/positions
   const defaultCameraView = useMemo(() => {
     return {
-      position: new THREE.Vector3(-0.6, 0.1, 0.8),
+      position: new THREE.Vector3(-0.4, 0.1, 0.6),
       target: new THREE.Vector3(0, 0, 0),
     };
   }, []);
@@ -105,17 +105,6 @@ const Scene = () => {
       <PerspectiveCamera makeDefault fov={50} />
       <ambientLight intensity={1} />
       <color attach="background" args={["#31a2d6"]} />
-      <Html position={[0, 1, 0]}>
-        <button
-          onClick={() => {
-            console.log("Camera X", camera.position.x);
-            console.log("Camera Y", camera.position.y);
-            console.log("Camera Z", camera.position.z);
-          }}
-        >
-          Print Camera Indexes
-        </button>
-      </Html>
 
       <group ref={groupRef}>
         {!activeComponent ? (
