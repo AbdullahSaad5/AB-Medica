@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${urbanist.variable} antialiased min-h-screen h-full w-full bg-red-50`}>
+      <body className={`${urbanist.className} antialiased min-h-screen h-full w-full bg-red-50`}>
         <Navbar />
         {children}
       </body>
