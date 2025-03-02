@@ -1,6 +1,6 @@
 import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useRef, useEffect, useState, useMemo } from "react";
-import { useThree } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { EffectComposer, Vignette } from "@react-three/postprocessing";
 import Stand from "../Models/stand";
@@ -15,6 +15,9 @@ const Scene = () => {
   const { camera } = useThree();
   const { activeComponent, setZoomLevel } = useActiveComponent();
   const [isInitialized, setIsInitialized] = useState(false);
+  const lastDistanceRef = useRef<number | null>(null);
+  const lastTargetRef = useRef<THREE.Vector3 | null>(null);
+  const forceUpdateRef = useRef(false);
 
   // Define different camera angles/positions
   const defaultCameraView = useMemo(() => {
@@ -108,17 +111,33 @@ const Scene = () => {
         // @ts-expect-error maxDistance is private
         controlsRef.current.maxDistance = maxSize * 2.5;
       }
+
+      // Force zoom recalculation on next frame
+      lastDistanceRef.current = null;
+      lastTargetRef.current = null;
+      forceUpdateRef.current = true;
     }
   }, [activeComponent, camera, isInitialized]);
 
-  // Add an effect to calculate and update zoom level
-  useEffect(() => {
+  // Use useFrame to calculate zoom level only when there's a change
+  useFrame(() => {
     const controlsInstance = controlsRef.current;
 
-    if (!controlsInstance || !groupRef.current) return;
+    if (!controlsInstance || !groupRef.current || !isInitialized) return;
 
-    // Function to calculate zoom level based on camera distance
-    const calculateZoomLevel = () => {
+    // Get current target and calculate distance
+    // @ts-expect-error target is private
+    const currentTarget = controlsInstance.target;
+    const currentDistance = camera.position.distanceTo(currentTarget);
+
+    // Check if target or distance has changed or if we need to force update
+    const targetChanged = !lastTargetRef.current || !lastTargetRef.current.equals(currentTarget);
+
+    const distanceChanged =
+      lastDistanceRef.current === null || Math.abs(lastDistanceRef.current - currentDistance) > 0.001;
+
+    // Calculate zoom level if something has changed or if forced
+    if (distanceChanged || targetChanged || forceUpdateRef.current) {
       const box = new THREE.Box3();
       if (groupRef.current) {
         box.setFromObject(groupRef.current);
@@ -126,45 +145,27 @@ const Scene = () => {
       const size = box.getSize(new THREE.Vector3());
       const maxSize = Math.max(size.x, size.y, size.z);
 
-      // Calculate current distance from camera to target
-      const distance = camera.position.distanceTo(
-        // @ts-expect-error target is private
-        controlsInstance.target
-      );
-
-      // Calculate zoom level as a normalized value
-      // 1 = fully zoomed out (maxDistance), 0 = fully zoomed in (minDistance)
       // @ts-expect-error minDistance and maxDistance are private
       const minDist = controlsInstance.minDistance || maxSize * 0.35;
       // @ts-expect-error minDistance and maxDistance are private
       const maxDist = controlsInstance.maxDistance || maxSize * 2.5;
 
       // Normalize distance to a 0-1 scale (inverted so zoom in = higher value)
-      const normalizedZoom = 1 - (distance - minDist) / (maxDist - minDist);
+      const normalizedZoom = 1 - (currentDistance - minDist) / (maxDist - minDist);
 
       // Clamp between 0 and 1
-      return Math.max(0, Math.min(1, normalizedZoom));
-    };
+      setZoomLevel(Math.max(0, Math.min(1, normalizedZoom)));
 
-    // Initial calculation
-    setZoomLevel(calculateZoomLevel());
+      // Update refs
+      lastDistanceRef.current = currentDistance;
+      lastTargetRef.current = currentTarget.clone();
 
-    // Add event listener for OrbitControls change event
-    const handleControlsChange = () => {
-      setZoomLevel(calculateZoomLevel());
-    };
-
-    // @ts-expect-error addEventListener is private
-    controlsInstance.addEventListener("change", handleControlsChange);
-
-    // Clean up
-    return () => {
-      if (controlsInstance) {
-        // @ts-expect-error removeEventListener is private
-        controlsInstance.removeEventListener("change", handleControlsChange);
+      // Reset force update flag
+      if (forceUpdateRef.current) {
+        forceUpdateRef.current = false;
       }
-    };
-  }, [camera, isInitialized, setZoomLevel]);
+    }
+  });
 
   return (
     <>
