@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { useActiveComponent } from "../providers/ActiveComponentProvider";
 
 interface UseAnimationMixerProps {
   modelRef: React.RefObject<THREE.Group>;
@@ -11,6 +12,7 @@ export const useAnimationMixer = ({ modelRef, animations, isActive }: UseAnimati
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const actionsRef = useRef<THREE.AnimationAction[]>([]);
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
+  const { setShowComponentDetails } = useActiveComponent();
 
   useEffect(() => {
     if (!animations.length || !modelRef.current) return;
@@ -34,12 +36,17 @@ export const useAnimationMixer = ({ modelRef, animations, isActive }: UseAnimati
       actionsRef.current.forEach((action) => {
         action.reset();
         action.play();
-        action.getMixer().addEventListener("finished", () => setIsAnimationPlaying(false));
+        action.getMixer().addEventListener("finished", () => {
+          setIsAnimationPlaying(false);
+          setShowComponentDetails(true);
+        });
       });
       setIsAnimationPlaying(true);
+      setShowComponentDetails(false);
     } else {
       actionsRef.current.forEach((action) => action.stop());
       setIsAnimationPlaying(false);
+      setShowComponentDetails(false);
     }
   }, [isActive]);
 

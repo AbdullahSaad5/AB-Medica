@@ -8,12 +8,15 @@ type ActiveComponentContextType = {
   zoomLevel: number;
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   scaleFactor: number;
+  showComponentDetails: boolean;
+  setShowComponentDetails: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ActiveComponentContext = React.createContext({} as ActiveComponentContextType);
 
 const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeComponent, setActiveComponent] = React.useState<ActiveComponent>(null);
+  const [showComponentDetails, setShowComponentDetails] = React.useState(false);
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const scaleFactor = 0.5 / zoomLevel;
   const maxScale = 1.5;
@@ -21,6 +24,7 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
   const handleSetActiveComponent = (component: ActiveComponent) => {
     if (activeComponent === component) {
       setActiveComponent(null);
+      setShowComponentDetails(false);
     } else {
       setActiveComponent(component);
     }
@@ -34,6 +38,8 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
         zoomLevel,
         setZoomLevel,
         scaleFactor: scaleFactor > maxScale ? maxScale : scaleFactor,
+        showComponentDetails,
+        setShowComponentDetails,
       }}
     >
       {children}

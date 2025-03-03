@@ -2,12 +2,13 @@ import React from "react";
 import InfoCard from "./InfoCard";
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { ArrowLeft } from "lucide-react";
+import DetailsCard from "./DetailsCard";
 
 const UIOverlay = () => {
-  const { activeComponent, handleSetActiveComponent } = useActiveComponent();
+  const { activeComponent, handleSetActiveComponent, showComponentDetails } = useActiveComponent();
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 p-4 z-10 pointer-events-none">
-      <InfoCard />
+      {!activeComponent ? <InfoCard /> : activeComponent && showComponentDetails && <DetailsCard />}
 
       {activeComponent && (
         <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
