@@ -7,6 +7,7 @@ import NumberHotspot from "../_components/Hotspots/NumberHotspot";
 import VideoPlayer from "../_components/VideoPlayer";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import LoadingScreen from "../_components/LoadingScreen";
 
 type Hotspot = {
   x: number;
@@ -24,6 +25,7 @@ const Benefits = () => {
   const [isFullscreenPlaying, setIsFullscreenPlaying] = useState(false);
   const [isPlayingReverse, setIsPlayingReverse] = useState(false);
   const [isDonePlaying, setIsDonePlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
@@ -91,6 +93,42 @@ const Benefits = () => {
     ],
     []
   );
+
+  // Preload assets
+  useEffect(() => {
+    let loadedImages = 0;
+    let loadedVideos = 0;
+
+    // Collect all unique assets to preload
+    const allImages = [DEFAULT_IMAGE, ...hotspots.map((hotspot) => hotspot.stillImage).filter(Boolean)] as string[];
+    const allVideos = hotspots.flatMap((hotspot) => [hotspot.video, hotspot.reverseVideo]).filter(Boolean) as string[];
+
+    const totalAssets = allImages.length + allVideos.length;
+
+    // Preload images
+    allImages.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+      img.onload = () => {
+        loadedImages++;
+        if (loadedImages + loadedVideos === totalAssets) {
+          setIsLoading(false);
+        }
+      };
+    });
+
+    // Preload videos
+    allVideos.forEach((src) => {
+      const video = document.createElement("video");
+      video.src = src;
+      video.oncanplaythrough = () => {
+        loadedVideos++;
+        if (loadedImages + loadedVideos === totalAssets) {
+          setIsLoading(false);
+        }
+      };
+    });
+  }, [DEFAULT_IMAGE, hotspots]);
 
   // Handle modal video playback
   useEffect(() => {
@@ -184,63 +222,69 @@ const Benefits = () => {
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {/* Base background image */}
-      <Image
-        src={currentImage}
-        alt="Vista iniziale"
-        fill
-        className="object-cover h-full w-full"
-        priority
-        quality={100}
-      />
-
-      {/* Fullscreen video background */}
-      {isFullscreenPlaying && selectedHotspot && !isDonePlaying && (
-        <FullScreenVideo
-          videoRef={fullscreenVideoRef}
-          handleVideoStart={handleVideoStart}
-          videoSrc={isPlayingReverse ? selectedHotspot.reverseVideo! : selectedHotspot.video}
-          handleCloseVideo={handleCloseFullscreen}
-          handleVideoEnd={handleVideoEnd}
-          showCloseButton={!isPlayingReverse}
-        />
-      )}
-
-      {/* Hotspots */}
-      {!isFullscreenPlaying &&
-        hotspots.map((hotspot, index) => (
-          <NumberHotspot
-            color={hotspot.color}
-            number={index + 1}
-            onClick={() => handleHotspotClick(index)}
-            position={{ x: hotspot.x, y: hotspot.y }}
-            key={`hotspot-${index}`}
+      {isLoading ? (
+        <LoadingScreen />
+      ) : (
+        <>
+          {/* Base background image */}
+          <Image
+            src={currentImage}
+            alt="Vista iniziale"
+            fill
+            className="object-cover h-full w-full"
+            priority
+            quality={100}
           />
-        ))}
 
-      {/* Modal for non-fullscreen videos */}
-      {modalOpen && selectedHotspot?.displayMode === "modal" && (
-        <VideoPlayer
-          videoRef={videoRef}
-          videoSrc={selectedHotspot.video}
-          handleCloseModal={() => setModalOpen(false)}
-          handleVideoEnd={handleVideoEnd}
-        />
-      )}
+          {/* Fullscreen video background */}
+          {isFullscreenPlaying && selectedHotspot && !isDonePlaying && (
+            <FullScreenVideo
+              videoRef={fullscreenVideoRef}
+              handleVideoStart={handleVideoStart}
+              videoSrc={isPlayingReverse ? selectedHotspot.reverseVideo! : selectedHotspot.video}
+              handleCloseVideo={handleCloseFullscreen}
+              handleVideoEnd={handleVideoEnd}
+              showCloseButton={!isPlayingReverse}
+            />
+          )}
 
-      {/* Back button */}
-      {!isFullscreenPlaying && (
-        <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
-          <div className="flex justify-between">
-            <button
-              className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
-              onClick={handleNavigateBack}
-              aria-label="Back to setup"
-            >
-              <ArrowLeft className="w-14 h-14 text-white group-hover:text-primary" />
-            </button>
-          </div>
-        </div>
+          {/* Hotspots */}
+          {!isFullscreenPlaying &&
+            hotspots.map((hotspot, index) => (
+              <NumberHotspot
+                color={hotspot.color}
+                number={index + 1}
+                onClick={() => handleHotspotClick(index)}
+                position={{ x: hotspot.x, y: hotspot.y }}
+                key={`hotspot-${index}`}
+              />
+            ))}
+
+          {/* Modal for non-fullscreen videos */}
+          {modalOpen && selectedHotspot?.displayMode === "modal" && (
+            <VideoPlayer
+              videoRef={videoRef}
+              videoSrc={selectedHotspot.video}
+              handleCloseModal={() => setModalOpen(false)}
+              handleVideoEnd={handleVideoEnd}
+            />
+          )}
+
+          {/* Back button */}
+          {!isFullscreenPlaying && (
+            <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
+              <div className="flex justify-between">
+                <button
+                  className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
+                  onClick={handleNavigateBack}
+                  aria-label="Back to setup"
+                >
+                  <ArrowLeft className="w-14 h-14 text-white group-hover:text-primary" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
