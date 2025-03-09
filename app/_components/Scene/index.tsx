@@ -19,18 +19,51 @@ const Scene = () => {
   const lastTargetRef = useRef<THREE.Vector3 | null>(null);
   const forceUpdateRef = useRef(false);
 
-  // Define different camera angles/positions
-  const defaultCameraView = useMemo(() => {
+  // Define specific camera views for each component
+  const cameraViews = useMemo(() => {
     return {
-      position: new THREE.Vector3(-0.4, 0.1, 0.6),
-      target: new THREE.Vector3(0, 0, 0),
+      default: {
+        position: new THREE.Vector3(-0.4, 0.1, 0.6),
+        target: new THREE.Vector3(0, 0, 0),
+        zoomFactor: 1,
+        maxDistance: 2.8,
+        minDistance: 0.5,
+      },
+      stand: {
+        position: new THREE.Vector3(0.6, -0.2, 0.4), // Bottom-right angle
+        target: new THREE.Vector3(0, -0.1, 0),
+        zoomFactor: 1.5,
+        maxDistance: 1.5,
+        minDistance: 0.5,
+      },
+      nozel: {
+        position: new THREE.Vector3(-0.5, 0.3, 0.5), // Top-left angle
+        target: new THREE.Vector3(0, 0.1, 0),
+        zoomFactor: 1.2,
+        maxDistance: 1,
+        minDistance: 0.75,
+      },
+      machine: {
+        position: new THREE.Vector3(0.2, 0.5, 0.6), // Top-front angle
+        target: new THREE.Vector3(0, 0, 0),
+        zoomFactor: 2,
+        maxDistance: 1,
+        minDistance: 0.5,
+      },
+      device: {
+        position: new THREE.Vector3(-0.3, 0.2, -0.7), // Back angle
+        target: new THREE.Vector3(0, 0, 0),
+        zoomFactor: 2.5,
+        maxDistance: 1.2,
+        minDistance: 0.5,
+      },
     };
   }, []);
 
   // Set initial camera position (runs once)
   useEffect(() => {
     if (!isInitialized && groupRef.current) {
-      const initialView = defaultCameraView; // Change this to your preferred initial view
+      const initialView = cameraViews.default;
 
       const box = new THREE.Box3();
       if (groupRef.current) {
@@ -48,76 +81,41 @@ const Scene = () => {
 
       if (controlsRef.current) {
         // @ts-expect-error target is private
-        controlsRef.current.target.set(center.x, center.y, center.z);
+        controlsRef.current.target.set(
+          center.x + initialView.target.x,
+          center.y + initialView.target.y,
+          center.z + initialView.target.z
+        );
         // @ts-expect-error update is private
         controlsRef.current.update();
       }
 
       setIsInitialized(true);
     }
-  }, [camera, isInitialized, defaultCameraView]);
+  }, [camera, isInitialized, cameraViews]);
 
-  // This effect runs when activeComponent changes
+  // Update camera target to the center of the active component
   useEffect(() => {
-    if (groupRef.current) {
-      const box = new THREE.Box3();
-      if (groupRef.current) {
-        box.setFromObject(groupRef.current);
-      }
-      const center = new THREE.Vector3();
-      box.getCenter(center);
+    if (groupRef.current && isInitialized && activeComponent) {
+      const activeComponentRef = groupRef.current.children.find((child) => child.name === activeComponent);
 
-      if (controlsRef.current) {
-        // @ts-expect-error target is private
-        controlsRef.current.target.set(center.x, center.y, center.z);
-        // @ts-expect-error update is private
-        controlsRef.current.update();
-      }
+      if (activeComponentRef) {
+        const box = new THREE.Box3();
+        box.setFromObject(activeComponentRef);
 
-      const size = box.getSize(new THREE.Vector3());
-      let maxSize;
-      if (activeComponent === "device") {
-        maxSize = Math.max(size.x, size.y, size.z) * 2.5;
-      } else {
-        maxSize = Math.max(size.x, size.y, size.z);
-      }
+        const center = new THREE.Vector3();
+        box.getCenter(center);
 
-      // Only adjust camera if we've already initialized and component changes
-      if (isInitialized) {
-        const zoomFactor =
-          activeComponent === "stand"
-            ? 1.5
-            : activeComponent === "nozel"
-            ? 1.2
-            : activeComponent === "machine"
-            ? 2
-            : activeComponent === "device"
-            ? 2.5
-            : 1;
-
-        if (activeComponent) {
-          camera.position.set(
-            center.x + maxSize * zoomFactor,
-            center.y + maxSize * zoomFactor,
-            center.z + maxSize * zoomFactor
-          );
-          camera.lookAt(center);
+        // Update the camera's target to the center of the active component
+        if (controlsRef.current) {
+          // @ts-expect-error target is private
+          controlsRef.current.target.copy(center);
+          // @ts-expect-error update is private
+          controlsRef.current.update();
         }
       }
-
-      if (controlsRef.current) {
-        // @ts-expect-error minDistance is private
-        controlsRef.current.minDistance = maxSize * 0.35;
-        // @ts-expect-error maxDistance is private
-        controlsRef.current.maxDistance = maxSize * 2.5;
-      }
-
-      // Force zoom recalculation on next frame
-      lastDistanceRef.current = null;
-      lastTargetRef.current = null;
-      forceUpdateRef.current = true;
     }
-  }, [activeComponent, camera, isInitialized]);
+  }, [activeComponent, isInitialized]);
 
   // Use useFrame to calculate zoom level only when there's a change
   useFrame(() => {
@@ -199,6 +197,8 @@ const Scene = () => {
         zoomSpeed={1}
         minPolarAngle={0.3}
         maxPolarAngle={Math.PI / 1.1}
+        maxDistance={cameraViews[activeComponent ? activeComponent : "default"].maxDistance}
+        minDistance={cameraViews[activeComponent ? activeComponent : "default"].minDistance}
       />
       <Environment preset="city" />
 
