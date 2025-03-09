@@ -6,12 +6,14 @@ const FullScreenVideo = ({
   videoSrc,
   handleCloseVideo,
   handleVideoEnd,
+  handleVideoStart,
   showCloseButton,
 }: {
   videoRef: React.RefObject<HTMLVideoElement>;
   videoSrc: string;
   handleCloseVideo: () => void;
   handleVideoEnd: () => void;
+  handleVideoStart?: () => void;
   showCloseButton: boolean;
 }) => {
   const [disabled, setDisabled] = useState(false);
@@ -26,6 +28,7 @@ const FullScreenVideo = ({
         playsInline
         onPlay={() => {
           setDisabled(true);
+          if (handleVideoStart) handleVideoStart();
         }}
         onEnded={() => {
           setDisabled(false);
