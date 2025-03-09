@@ -8,7 +8,7 @@ import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
 import { useFrame } from "@react-three/fiber";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
-const Nozel = () => {
+const Nozel = ({ isVisible }: { isVisible: boolean }) => {
   const result = useGLTF("./models/dolphin_manipolo-1.glb");
   const groupRef = useRef<Group>(null);
   const modelRef = useRef<Group>(null);
@@ -102,7 +102,7 @@ const Nozel = () => {
     }
   });
 
-  return (
+  return isVisible ? (
     <group ref={groupRef}>
       <primitive ref={modelRef} object={result.scene} />
 
@@ -124,7 +124,7 @@ const Nozel = () => {
         />
       ))}
     </group>
-  );
+  ) : null;
 };
 
 export default Nozel;

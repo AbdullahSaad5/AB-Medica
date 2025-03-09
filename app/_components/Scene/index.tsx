@@ -172,7 +172,11 @@ const Scene = () => {
       <color attach="background" args={["#31a2d6"]} />
 
       <group ref={groupRef}>
-        {!activeComponent ? (
+        <Stand isVisible={!activeComponent || activeComponent === "stand"} />
+        <Nozel isVisible={!activeComponent || activeComponent === "nozel"} />
+        <Machine isVisible={!activeComponent || activeComponent === "machine"} />
+        <Device isVisible={!activeComponent || activeComponent === "device"} />
+        {/* {!activeComponent ? (
           <>
             <Stand />
             <Nozel />
@@ -187,7 +191,7 @@ const Scene = () => {
           <Machine />
         ) : (
           <Device />
-        )}
+        )} */}
       </group>
 
       <OrbitControls

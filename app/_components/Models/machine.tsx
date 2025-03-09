@@ -8,7 +8,7 @@ import type { Group } from "three";
 import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
-const Machine = () => {
+const Machine = ({ isVisible }: { isVisible: boolean }) => {
   const result = useGLTF("./models/Corpo Dolphin.glb");
   const modelRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
@@ -40,7 +40,7 @@ const Machine = () => {
     }
   });
 
-  return (
+  return isVisible ? (
     <group ref={groupRef}>
       <primitive ref={modelRef} object={result.scene} />
       {!activeComponent && (
@@ -68,7 +68,7 @@ const Machine = () => {
         />
       ))}
     </group>
-  );
+  ) : null;
 };
 
 // Preload the model

@@ -7,7 +7,7 @@ import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
 import { useFrame } from "@react-three/fiber";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
-const Device = () => {
+const Device = ({ isVisible }: { isVisible: boolean }) => {
   const result = useGLTF("./models/dolphin_cartuccia.glb");
   const groupRef = useRef<Group>(null);
   const modelRef = useRef<Group>(null);
@@ -45,7 +45,7 @@ const Device = () => {
     }
   });
 
-  return (
+  return isVisible ? (
     <group ref={groupRef}>
       <primitive ref={modelRef} object={result.scene} />
 
@@ -60,7 +60,7 @@ const Device = () => {
         />
       ))}
     </group>
-  );
+  ) : null;
 };
 
 export default Device;

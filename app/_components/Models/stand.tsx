@@ -1,10 +1,10 @@
 import { useGLTF } from "@react-three/drei";
 import React from "react";
 
-const Stand = () => {
+const Stand = ({ isVisible }: { isVisible: boolean }) => {
   const result = useGLTF("./models/dolphin_stand.glb");
 
-  return <primitive object={result.scene} />;
+  return isVisible ? <primitive object={result.scene} /> : null;
 };
 
 export default Stand;
