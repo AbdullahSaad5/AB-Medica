@@ -35,6 +35,7 @@ export const useAnimationMixer = ({ modelRef, animations, isActive }: UseAnimati
     if (isActive) {
       actionsRef.current.forEach((action) => {
         action.reset();
+        action.timeScale = 1; // Play forward
         action.play();
         action.getMixer().addEventListener("finished", () => {
           setIsAnimationPlaying(false);
@@ -44,9 +45,16 @@ export const useAnimationMixer = ({ modelRef, animations, isActive }: UseAnimati
       setIsAnimationPlaying(true);
       setShowComponentDetails(false);
     } else {
-      actionsRef.current.forEach((action) => action.stop());
-      setIsAnimationPlaying(false);
-      setShowComponentDetails(false);
+      actionsRef.current.forEach((action) => {
+        action.paused = false;
+        action.timeScale = -1; // Reverse animation
+        action.play();
+        action.getMixer().addEventListener("finished", () => {
+          setIsAnimationPlaying(false);
+          setShowComponentDetails(false);
+        });
+      });
+      setIsAnimationPlaying(true);
     }
   }, [isActive]);
 
