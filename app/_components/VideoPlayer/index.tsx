@@ -24,7 +24,14 @@ const VideoPlayer = ({
         </button>
 
         <div className="w-full relative">
-          <video ref={videoRef} className="w-full h-auto rounded-lg" autoPlay playsInline onEnded={handleVideoEnd}>
+          <video
+            ref={videoRef}
+            className="w-full h-auto rounded-lg"
+            autoPlay
+            controls
+            playsInline
+            onEnded={handleVideoEnd}
+          >
             <source src={videoSrc} type="video/mp4" />
           </video>
         </div>
