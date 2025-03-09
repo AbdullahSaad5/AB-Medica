@@ -19,7 +19,7 @@ const Hotspot = ({ position, groupRef, occlude = false, onClick }: HotspotProps)
       position={position}
       zIndexRange={[0, 0]}
       center
-      distanceFactor={scaleFactor}
+      distanceFactor={scaleFactor * 0.7}
       occlude={groupRef && occlude ? [groupRef] : undefined}
       className="pointer-events-auto"
     >
