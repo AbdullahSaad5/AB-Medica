@@ -10,7 +10,7 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: "AB Meidca",
+  title: "AB Medica",
   description: "AB Medica",
 };
 
