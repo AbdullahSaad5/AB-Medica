@@ -176,22 +176,6 @@ const Scene = () => {
         <Nozel isVisible={!activeComponent || activeComponent === "nozel"} />
         <Machine isVisible={!activeComponent || activeComponent === "machine"} />
         <Device isVisible={!activeComponent || activeComponent === "device"} />
-        {/* {!activeComponent ? (
-          <>
-            <Stand />
-            <Nozel />
-            <Machine />
-            <Device />
-          </>
-        ) : activeComponent === "stand" ? (
-          <Stand />
-        ) : activeComponent === "nozel" ? (
-          <Nozel />
-        ) : activeComponent === "machine" ? (
-          <Machine />
-        ) : (
-          <Device />
-        )} */}
       </group>
 
       <OrbitControls
