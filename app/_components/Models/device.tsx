@@ -25,16 +25,16 @@ const Device = ({ isVisible }: { isVisible: boolean }) => {
     meshNamesToLabel: [
       {
         name: "SFERA",
-        label: "Sfera",
+        label: "Galleggiante",
         positionAdjustments: [0.013, 0.01, 0],
       },
       {
         name: "VENTOLA_1",
-        label: "Ventola 1",
+        label: "Girante Della Pompa",
       },
       {
         name: "TRASMISSIONE",
-        label: "Trasmissione",
+        label: "Trascinatore",
       },
     ],
   });

@@ -25,12 +25,12 @@ const Machine = ({ isVisible }: { isVisible: boolean }) => {
     scene: result.scene,
     meshNamesToLabel: [
       { name: "SCERMO_LED", label: "Schermo LED" },
-      { name: "SCOCCA_POSTERIORE_1", label: "Scocca Posteriore" },
-      { name: "SPORTELLO_SCOCCA", label: "Sportello Scocca" },
-      { name: "Tastiera_RetroIlluminata", label: "Tastiera Retroilluminata" },
-      { name: "AGGANCIO_2", label: "Aggancio 2" },
-      { name: "BASE_MOTORE", label: "Base Motore" },
-      { name: "SCHEDA001_5", label: "Scheda 001.5" },
+      { name: "SCOCCA_POSTERIORE_1", label: "Alimentatore A 24V", positionAdjustments: [-0.05, 0.01, 0] },
+      { name: "SPORTELLO_SCOCCA", label: "Sportello Vano Pompa" },
+      { name: "Tastiera_RetroIlluminata", label: "Tastiera Soft in Silicone" },
+      { name: "AGGANCIO_2", label: "Leva Di Blocaggio" },
+      { name: "BASE_MOTORE", label: "Motore Brushless ad Alta Efficienza" },
+      { name: "SCHEDA001_5", label: "Scheda Elettronica di Controllo" },
     ],
   });
 
@@ -65,6 +65,7 @@ const Machine = ({ isVisible }: { isVisible: boolean }) => {
           label={hotspot.name}
           position={hotspot.position}
           groupRef={groupRef}
+          positionAdjustments={hotspot.positionAdjustments}
         />
       ))}
     </group>

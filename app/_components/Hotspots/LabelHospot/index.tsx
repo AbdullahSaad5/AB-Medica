@@ -1,6 +1,6 @@
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { Html } from "@react-three/drei";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Group } from "three";
 
 type HotspotProps = {
@@ -24,6 +24,10 @@ const Label = ({
   const [isHovered, setIsHovered] = useState(false);
   const { scaleFactor } = useActiveComponent();
 
+  const calculatedScaleFactor = useMemo(() => {
+    return scaleFactor < 1 ? 1 : scaleFactor;
+  }, [scaleFactor]);
+
   if (!show) return;
 
   const finalCalculatedPosition = (
@@ -40,7 +44,7 @@ const Label = ({
     <Html
       position={finalCalculatedPosition}
       center
-      distanceFactor={scaleFactor}
+      distanceFactor={calculatedScaleFactor}
       occlude={groupRef && occlude ? [groupRef] : undefined}
       className="pointer-events-auto"
     >
