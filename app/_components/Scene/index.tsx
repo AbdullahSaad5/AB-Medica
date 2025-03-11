@@ -1,4 +1,9 @@
-import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import {
+  Environment,
+  // Html,
+  OrbitControls,
+  PerspectiveCamera,
+} from "@react-three/drei";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -20,11 +25,11 @@ const Scene = () => {
   const forceUpdateRef = useRef(false);
 
   // Define specific camera views for each component
-  const cameraViews = useMemo(() => {
-    return {
+  const cameraViews = useMemo(
+    () => ({
       default: {
-        position: new THREE.Vector3(-0.4, 0.1, 0.6),
-        target: new THREE.Vector3(0, 0, 0),
+        position: new THREE.Vector3(-0.303, 0.168, 0.615),
+        target: new THREE.Vector3(0.098, -0.026, 0.007),
         zoomFactor: 1,
         maxDistance: 2.8,
         minDistance: 0.5,
@@ -46,7 +51,7 @@ const Scene = () => {
       machine: {
         position: new THREE.Vector3(0.2, 0.5, 0.6), // Top-front angle
         target: new THREE.Vector3(0, 0, 0),
-        zoomFactor: 2,
+        zoomFactor: 1,
         maxDistance: 1,
         minDistance: 0.5,
       },
@@ -57,22 +62,20 @@ const Scene = () => {
         maxDistance: 1.2,
         minDistance: 0.5,
       },
-    };
-  }, []);
+    }),
+    []
+  );
 
   // Set initial camera position (runs once)
   useEffect(() => {
     if (!isInitialized && groupRef.current) {
       const initialView = cameraViews.default;
-
       const box = new THREE.Box3();
-      if (groupRef.current) {
-        box.setFromObject(groupRef.current);
-      }
+      box.setFromObject(groupRef.current);
       const center = new THREE.Vector3();
       box.getCenter(center);
 
-      // Set camera position relative to the center of the object
+      // Position camera relative to center
       camera.position.set(
         center.x + initialView.position.x,
         center.y + initialView.position.y,
@@ -89,57 +92,47 @@ const Scene = () => {
         // @ts-expect-error update is private
         controlsRef.current.update();
       }
-
       setIsInitialized(true);
     }
   }, [camera, isInitialized, cameraViews]);
 
-  // Update camera target to the center of the active component
+  // Update camera target when the active component changes
   useEffect(() => {
-    if (groupRef.current && isInitialized && activeComponent) {
-      const activeComponentRef = groupRef.current.children.find((child) => child.name === activeComponent);
+    if (groupRef.current && isInitialized) {
+      // Compute the center of the group
+      const box = new THREE.Box3();
+      box.setFromObject(groupRef.current);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
 
-      if (activeComponentRef) {
-        const box = new THREE.Box3();
-        box.setFromObject(activeComponentRef);
+      // Get the view for the active component, defaulting if necessary
+      const view = activeComponent ? cameraViews[activeComponent] : cameraViews.default;
 
-        const center = new THREE.Vector3();
-        box.getCenter(center);
-
-        // Update the camera's target to the center of the active component
-        if (controlsRef.current) {
-          // @ts-expect-error target is private
-          controlsRef.current.target.copy(center);
-          // @ts-expect-error update is private
-          controlsRef.current.update();
-        }
+      if (controlsRef.current) {
+        // Set target as the group's center plus the view's target offset
+        // @ts-expect-error target is private
+        controlsRef.current.target.set(center.x + view.target.x, center.y + view.target.y, center.z + view.target.z);
+        // @ts-expect-error update is private
+        controlsRef.current.update();
       }
     }
-  }, [activeComponent, isInitialized]);
+  }, [activeComponent, isInitialized, cameraViews]);
 
-  // Use useFrame to calculate zoom level only when there's a change
+  // Update zoom level using useFrame
   useFrame(() => {
     const controlsInstance = controlsRef.current;
-
     if (!controlsInstance || !groupRef.current || !isInitialized) return;
 
-    // Get current target and calculate distance
     // @ts-expect-error target is private
     const currentTarget = controlsInstance.target;
     const currentDistance = camera.position.distanceTo(currentTarget);
-
-    // Check if target or distance has changed or if we need to force update
     const targetChanged = !lastTargetRef.current || !lastTargetRef.current.equals(currentTarget);
-
     const distanceChanged =
       lastDistanceRef.current === null || Math.abs(lastDistanceRef.current - currentDistance) > 0.001;
 
-    // Calculate zoom level if something has changed or if forced
     if (distanceChanged || targetChanged || forceUpdateRef.current) {
       const box = new THREE.Box3();
-      if (groupRef.current) {
-        box.setFromObject(groupRef.current);
-      }
+      box.setFromObject(groupRef.current);
       const size = box.getSize(new THREE.Vector3());
       const maxSize = Math.max(size.x, size.y, size.z);
 
@@ -148,22 +141,70 @@ const Scene = () => {
       // @ts-expect-error minDistance and maxDistance are private
       const maxDist = controlsInstance.maxDistance || maxSize * 2.5;
 
-      // Normalize distance to a 0-1 scale (inverted so zoom in = higher value)
       const normalizedZoom = 1 - (currentDistance - minDist) / (maxDist - minDist);
-
-      // Clamp between 0 and 1
       setZoomLevel(Math.max(0, Math.min(1, normalizedZoom)));
 
-      // Update refs
       lastDistanceRef.current = currentDistance;
       lastTargetRef.current = currentTarget.clone();
 
-      // Reset force update flag
       if (forceUpdateRef.current) {
         forceUpdateRef.current = false;
       }
     }
   });
+
+  // Button click: compute and log the camera offsets (reverse the math)
+  // const handleGetCameraInfo = () => {
+  //   if (!groupRef.current) {
+  //     console.warn("Group reference not available.");
+  //     return;
+  //   }
+  //   // Compute the center of the group
+  //   const box = new THREE.Box3();
+  //   box.setFromObject(groupRef.current);
+  //   const center = new THREE.Vector3();
+  //   box.getCenter(center);
+
+  //   // Calculate relative camera position: offset = camera.position - center
+  //   const relativePosition = new THREE.Vector3().subVectors(camera.position, center);
+
+  //   // Calculate relative target: offset = controls.target - center
+  //   if (!controlsRef.current) {
+  //     console.warn("Controls reference not available.");
+  //     return;
+  //   }
+  //   // @ts-expect-error target is private
+  //   const relativeTarget = new THREE.Vector3().subVectors(controlsRef.current.target, center);
+
+  //   // Log the values in a format to copy into cameraViews
+  //   console.log("New camera view:");
+  //   console.log(
+  //     "position: new THREE.Vector3(" +
+  //       relativePosition.x.toFixed(3) +
+  //       ", " +
+  //       relativePosition.y.toFixed(3) +
+  //       ", " +
+  //       relativePosition.z.toFixed(3) +
+  //       "),"
+  //   );
+  //   console.log(
+  //     "target: new THREE.Vector3(" +
+  //       relativeTarget.x.toFixed(3) +
+  //       ", " +
+  //       relativeTarget.y.toFixed(3) +
+  //       ", " +
+  //       relativeTarget.z.toFixed(3) +
+  //       "),"
+  //   );
+  // };
+
+  // Assume you have a cameraViews object that defines a zoomFactor for each component
+  useEffect(() => {
+    const view = activeComponent ? cameraViews[activeComponent] : cameraViews.default;
+    // Set the camera zoom factor and update its projection matrix
+    camera.zoom = view.zoomFactor;
+    camera.updateProjectionMatrix();
+  }, [activeComponent, camera, cameraViews]);
 
   return (
     <>
@@ -180,23 +221,26 @@ const Scene = () => {
 
       <OrbitControls
         ref={controlsRef}
-        enablePan={false}
+        // enablePan={false}
         dampingFactor={0.1}
         zoomSpeed={1}
         minPolarAngle={0.3}
         maxPolarAngle={Math.PI / 1.1}
-        maxDistance={cameraViews[activeComponent ? activeComponent : "default"].maxDistance}
-        minDistance={cameraViews[activeComponent ? activeComponent : "default"].minDistance}
+        maxDistance={(activeComponent ? cameraViews[activeComponent] : cameraViews.default).maxDistance}
+        minDistance={(activeComponent ? cameraViews[activeComponent] : cameraViews.default).minDistance}
       />
       <Environment preset="city" />
 
       <EffectComposer>
-        <Vignette
-          offset={0.5} // Distance of the vignette effect from the center
-          darkness={0.5} // Intensity of the vignette effect
-          eskil={false} // Use Eskil's vignette algorithm
-        />
+        <Vignette offset={0.5} darkness={0.5} eskil={false} />
       </EffectComposer>
+
+      {/* Button overlay for retrieving camera info */}
+      {/* <Html position={[0, 1, 0]}>
+        <div style={{ position: "absolute", top: 20, left: 20, zIndex: 1 }}>
+          <button onClick={handleGetCameraInfo}>Get Camera Info</button>
+        </div>
+      </Html> */}
     </>
   );
 };
