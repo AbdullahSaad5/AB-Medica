@@ -14,7 +14,7 @@ const VideoPlayer = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center pointer-events-auto z-50">
-      <div className="w-11/12 relative">
+      <div className="w-3/4 relative">
         <button
           onClick={() => handleCloseModal()}
           className="absolute top-8 right-8 z-10 p-2  rounded-2xl bg-primary hover:bg-secondary transition-colors"
