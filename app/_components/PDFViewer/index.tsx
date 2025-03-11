@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
@@ -15,7 +15,23 @@ interface PDFViewerProps {
 const PDFViewer: React.FC<PDFViewerProps> = ({ pdfUrl, handleCloseModal }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const pdfWidth = 600; // Fixed PDF width in pixels
+  // const pdfWidth = 1000; // Fixed PDF width in pixels
+  const [pdfWidth, setPdfWidth] = useState(1000); // Fixed PDF width in pixels
+
+  // Dynamically set PDF width based on window width
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setPdfWidth(window.innerWidth - 80); // 32px padding on each side
+      } else {
+        setPdfWidth(1000);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -23,7 +39,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdfUrl, handleCloseModal }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center pointer-events-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center pointer-events-auto p-4">
       <div
         className="h-4/5 relative bg-white rounded-lg overflow-hidden"
         style={{ width: `${pdfWidth + 64}px` }} // PDF width + 32px padding on each side
