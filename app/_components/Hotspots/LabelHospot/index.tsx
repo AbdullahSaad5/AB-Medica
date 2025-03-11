@@ -50,6 +50,7 @@ const Label = ({
     >
       <div className="relative">
         {/* Label that appears on hover */}
+
         {isHovered && (
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap select-none">
             <div className="bg-secondary text-primary px-2 py-1 rounded shadow-lg text-sm">{label}</div>
@@ -62,7 +63,7 @@ const Label = ({
         <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="cursor-default bg-transparent border-2 border-secondary rounded-full p-0.5 hover:border-secondaryHover transition-colors duration-200"
+          className="cursor-default bg-transparent border-[3px] border-secondary rounded-full p-1 hover:border-secondaryHover transition-colors duration-200"
         />
       </div>
     </Html>
