@@ -42,6 +42,8 @@ const backwardVideos = [
 
 const Setup = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [targetIndex, setTargetIndex] = useState(0);
+  const [videoIndex, setVideoIndex] = useState(0);
   const [showingVideo, setShowingVideo] = useState(false);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [isLoading, setIsLoading] = useState(true);
@@ -143,17 +145,20 @@ const Setup = () => {
   // Reset nextImageLoaded when current index changes
   useEffect(() => {
     setNextImageLoaded(false);
+    setTargetIndex(currentIndex);
   }, [currentIndex]);
 
   // Update video src when showing video or direction changes
   useEffect(() => {
     if (showingVideo) {
-      const videoSrc = direction === "forward" ? forwardVideos[currentIndex] : backwardVideos[currentIndex];
+      const videoSrc = direction === "forward" ? forwardVideos[videoIndex] : backwardVideos[videoIndex];
 
       setCurrentVideoSrc(videoSrc);
-      console.log(`Setting video source to: ${videoSrc}`);
+      console.log(
+        `Setting video source to: ${videoSrc} (${direction} video index: ${videoIndex}, current index: ${currentIndex}, target index: ${targetIndex})`
+      );
     }
-  }, [showingVideo, direction, currentIndex]);
+  }, [showingVideo, direction, videoIndex, currentIndex, targetIndex]);
 
   // Handle video playback and cleanup
   useEffect(() => {
@@ -221,8 +226,14 @@ const Setup = () => {
     }
 
     if (!showingVideo && currentIndex < images.length - 1) {
-      // Preload the next image
+      // Calculate the target index we're heading to
       const nextIndex = currentIndex + 1;
+      setTargetIndex(nextIndex);
+
+      // Set the video index to the current index for forward navigation
+      setVideoIndex(currentIndex);
+
+      // Preload the next image
       preloadNextImage(nextIndex);
 
       setDirection("forward");
@@ -232,7 +243,12 @@ const Setup = () => {
 
   const handlePrevious = (): void => {
     if (!showingVideo && currentIndex > 0) {
+      // Calculate the target index we're heading to
       const prevIndex = currentIndex - 1;
+      setTargetIndex(prevIndex);
+
+      // Set the video index to the previous index for backward navigation
+      setVideoIndex(prevIndex);
 
       // Preload the previous image
       preloadNextImage(prevIndex);
@@ -245,13 +261,8 @@ const Setup = () => {
   const handleVideoEnd = (): void => {
     console.log("Video ended, direction:", direction);
 
-    if (direction === "forward") {
-      // Update the current index when video ends for forward direction
-      setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
-    } else {
-      // For backward direction, we already set the currentIndex in handlePrevious
-      // This ensures consistent behavior
-    }
+    // Update the current index when video ends
+    setCurrentIndex(targetIndex);
 
     // If the next image is loaded, hide the video
     if (nextImageLoaded) {
