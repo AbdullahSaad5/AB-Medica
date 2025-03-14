@@ -47,6 +47,7 @@ const Setup = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [nextImageLoaded, setNextImageLoaded] = useState(false);
   const [nextImageSrc, setNextImageSrc] = useState<string>(images[0]);
+  const [currentVideoSrc, setCurrentVideoSrc] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const preloadedImages = useRef<HTMLImageElement[]>([]);
   const preloadedVideos = useRef<HTMLVideoElement[]>([]);
@@ -144,10 +145,26 @@ const Setup = () => {
     setNextImageLoaded(false);
   }, [currentIndex]);
 
+  // Update video src when showing video or direction changes
+  useEffect(() => {
+    if (showingVideo) {
+      const videoSrc = direction === "forward" ? forwardVideos[currentIndex] : backwardVideos[currentIndex];
+
+      setCurrentVideoSrc(videoSrc);
+      console.log(`Setting video source to: ${videoSrc}`);
+    }
+  }, [showingVideo, direction, currentIndex]);
+
   // Handle video playback and cleanup
   useEffect(() => {
     if (showingVideo && videoRef.current) {
       const video = videoRef.current;
+
+      // When the video source changes, we need to load the new source
+      if (video.src !== currentVideoSrc && currentVideoSrc) {
+        video.src = currentVideoSrc;
+        video.load();
+      }
 
       // For Safari: ensure video is ready to play
       const playVideo = () => {
@@ -178,11 +195,7 @@ const Setup = () => {
         }
       };
     }
-  }, [showingVideo]);
-
-  const getCurrentVideo = (): string => {
-    return direction === "forward" ? forwardVideos[currentIndex] : backwardVideos[currentIndex];
-  };
+  }, [showingVideo, currentVideoSrc]);
 
   const preloadNextImage = (index: number): void => {
     // Clear any existing timeout
@@ -224,7 +237,6 @@ const Setup = () => {
       // Preload the previous image
       preloadNextImage(prevIndex);
 
-      setCurrentIndex(prevIndex);
       setDirection("backward");
       setShowingVideo(true);
     }
@@ -236,6 +248,9 @@ const Setup = () => {
     if (direction === "forward") {
       // Update the current index when video ends for forward direction
       setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+    } else {
+      // For backward direction, we already set the currentIndex in handlePrevious
+      // This ensures consistent behavior
     }
 
     // If the next image is loaded, hide the video
@@ -290,23 +305,20 @@ const Setup = () => {
             }}
           />
 
-          {showingVideo && (
-            <video
-              ref={videoRef}
-              className="absolute inset-0 w-full h-full object-cover"
-              autoPlay
-              playsInline
-              muted
-              onEnded={handleVideoEnd}
-              onError={(e) => {
-                console.error("Video error:", e);
-                handleVideoEnd(); // Ensure we don't get stuck
-              }}
-            >
-              <source src={getCurrentVideo()} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          )}
+          <video
+            ref={videoRef}
+            className={`absolute inset-0 w-full h-full object-cover ${showingVideo ? "visible" : "invisible"}`}
+            playsInline
+            muted
+            onEnded={handleVideoEnd}
+            onError={(e) => {
+              console.error("Video error:", e);
+              handleVideoEnd(); // Ensure we don't get stuck
+            }}
+          >
+            <source src={currentVideoSrc} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
 
           <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
             <div className="flex justify-between">
