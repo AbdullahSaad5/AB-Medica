@@ -279,7 +279,7 @@ const Benefits = () => {
                   onClick={handleNavigateBack}
                   aria-label="Back to setup"
                 >
-                  <ArrowLeft className="w-14 h-14 text-white group-hover:text-primary" />
+                  <ArrowLeft className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
                 </button>
               </div>
             </div>

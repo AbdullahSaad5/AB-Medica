@@ -10,7 +10,7 @@ import LoadingScreen from "./_components/LoadingScreen";
 export default function Home() {
   return (
     <div className="h-screen bg-white relative">
-      <Suspense fallback={<LoadingScreen />}>
+      <Suspense fallback={<LoadingScreen />} unstable_expectedLoadTime={3000}>
         <ActiveComponentProvider>
           <UIOverlay />
           <Canvas shadows>

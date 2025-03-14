@@ -119,6 +119,7 @@ const Setup = () => {
             fill
             className="object-cover h-full w-full transition-opacity duration-500"
             priority
+            quality={100}
           />
 
           {showingVideo && (
@@ -147,14 +148,14 @@ const Setup = () => {
                 onClick={handlePrevious}
                 disabled={currentIndex === 0 || showingVideo}
               >
-                <ArrowLeft className="w-14 h-14 text-white group-hover:text-primary" />
+                <ArrowLeft className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
               </button>
               <button
                 className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
                 onClick={handleNext}
                 disabled={showingVideo}
               >
-                <ArrowRight className="w-14 h-14 text-white group-hover:text-primary" />
+                <ArrowRight className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
               </button>
             </div>
           </div>
