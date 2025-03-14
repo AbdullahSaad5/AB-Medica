@@ -6,49 +6,51 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "../_components/LoadingScreen";
 
+const images = [
+  "/assets/images/Vista iniziale-1.png",
+  "/assets/images/Step 0 FRAME.png",
+  "/assets/images/Step 1 FRAME.png",
+  "/assets/images/Step 2 FRAME.png",
+  "/assets/images/Step 3 FRAME.png",
+  "/assets/images/Step 4 FRAME.png",
+  "/assets/images/Step 5 FRAME.png",
+  "/assets/images/Step 6 FRAME.png",
+  "/assets/images/Step 7 FRAME.png",
+];
+
+const forwardVideos = [
+  "/assets/videos/forwards/s0 avanti compr.mp4",
+  "/assets/videos/forwards/s1 avanti compr.mp4",
+  "/assets/videos/forwards/s2 avanti compr.mp4",
+  "/assets/videos/forwards/s3 avanti compr.mp4",
+  "/assets/videos/forwards/s4 avanti compr.mp4",
+  "/assets/videos/forwards/s5 avanti compr.mp4",
+  "/assets/videos/forwards/s6 avanti compr.mp4",
+  "/assets/videos/forwards/s7 avanti compr.mp4",
+];
+
+const backwardVideos = [
+  "/assets/videos/backwards/s0 back compr.mp4",
+  "/assets/videos/backwards/s1 back compr.mp4",
+  "/assets/videos/backwards/s2 back compr.mp4",
+  "/assets/videos/backwards/s3 back compr.mp4",
+  "/assets/videos/backwards/s4 back compr.mp4",
+  "/assets/videos/backwards/s5 back compr.mp4",
+  "/assets/videos/backwards/s6 back compr.mp4",
+  "/assets/videos/backwards/s7 back compr.mp4",
+];
+
 const Setup = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showingVideo, setShowingVideo] = useState(false);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [isLoading, setIsLoading] = useState(true);
+  const [nextImageLoaded, setNextImageLoaded] = useState(false);
+  const [nextImageSrc, setNextImageSrc] = useState<string>(images[currentIndex]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const preloadedImages = useRef<HTMLImageElement[]>([]);
   const preloadedVideos = useRef<HTMLVideoElement[]>([]);
   const router = useRouter();
-
-  const images = [
-    "/assets/images/Vista iniziale-1.png",
-    "/assets/images/Step 0 FRAME.png",
-    "/assets/images/Step 1 FRAME.png",
-    "/assets/images/Step 2 FRAME.png",
-    "/assets/images/Step 3 FRAME.png",
-    "/assets/images/Step 4 FRAME.png",
-    "/assets/images/Step 5 FRAME.png",
-    "/assets/images/Step 6 FRAME.png",
-    "/assets/images/Step 7 FRAME.png",
-  ];
-
-  const forwardVideos = [
-    "/assets/videos/forwards/s0 avanti compr.mp4",
-    "/assets/videos/forwards/s1 avanti compr.mp4",
-    "/assets/videos/forwards/s2 avanti compr.mp4",
-    "/assets/videos/forwards/s3 avanti compr.mp4",
-    "/assets/videos/forwards/s4 avanti compr.mp4",
-    "/assets/videos/forwards/s5 avanti compr.mp4",
-    "/assets/videos/forwards/s6 avanti compr.mp4",
-    "/assets/videos/forwards/s7 avanti compr.mp4",
-  ];
-
-  const backwardVideos = [
-    "/assets/videos/backwards/s0 back compr.mp4",
-    "/assets/videos/backwards/s1 back compr.mp4",
-    "/assets/videos/backwards/s2 back compr.mp4",
-    "/assets/videos/backwards/s3 back compr.mp4",
-    "/assets/videos/backwards/s4 back compr.mp4",
-    "/assets/videos/backwards/s5 back compr.mp4",
-    "/assets/videos/backwards/s6 back compr.mp4",
-    "/assets/videos/backwards/s7 back compr.mp4",
-  ];
 
   useEffect(() => {
     let loadedImages = 0;
@@ -80,6 +82,11 @@ const Setup = () => {
     });
   }, []);
 
+  // Reset nextImageLoaded when current index changes
+  useEffect(() => {
+    setNextImageLoaded(false);
+  }, [currentIndex]);
+
   const getCurrentVideo = () => {
     return direction === "forward" ? forwardVideos[currentIndex] : backwardVideos[currentIndex];
   };
@@ -87,8 +94,20 @@ const Setup = () => {
   const handleNext = () => {
     if (currentIndex === images.length - 1) {
       router.push("/benefits");
+      return;
     }
+
     if (!showingVideo && currentIndex < images.length - 1) {
+      // Start preloading the next image if going forward
+      if (currentIndex + 1 < images.length) {
+        console.log("Preloading next image");
+        setNextImageLoaded(false);
+        setTimeout(() => {
+          setNextImageSrc(images[currentIndex + 1]);
+        }, 50);
+        console.log("images[currentIndex + 1]", images[currentIndex + 1]);
+      }
+
       setDirection("forward");
       setShowingVideo(true);
     }
@@ -97,6 +116,14 @@ const Setup = () => {
   const handlePrevious = () => {
     if (!showingVideo && currentIndex > 0) {
       const newIndex = currentIndex - 1;
+
+      // Preload the previous image
+      setNextImageLoaded(false);
+      console.log("images[newIndex]", images[newIndex]);
+      setTimeout(() => {
+        setNextImageSrc(images[newIndex]);
+      }, 50);
+
       setCurrentIndex(newIndex);
       setDirection("backward");
       setShowingVideo(true);
@@ -104,7 +131,28 @@ const Setup = () => {
   };
 
   const handleVideoEnd = () => {
-    setShowingVideo(false);
+    if (direction === "forward") {
+      // Update the current index when video ends
+      setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+
+      // Only hide the video when the next image is loaded
+      if (nextImageLoaded) {
+        setShowingVideo(false);
+      }
+    } else {
+      // For backward direction, just hide the video once it ends and image is loaded
+      if (nextImageLoaded) {
+        setShowingVideo(false);
+      }
+    }
+  };
+
+  const handleImageLoad = () => {
+    setNextImageLoaded(true);
+    // If video has already ended, we can now hide it
+    if (videoRef.current && videoRef.current.ended) {
+      setShowingVideo(false);
+    }
   };
 
   return (
@@ -113,27 +161,40 @@ const Setup = () => {
         <LoadingScreen />
       ) : (
         <>
+          {/* Current image */}
           <Image
-            src={images[currentIndex]}
+            src={nextImageSrc as string}
             alt={`Step ${currentIndex}`}
             fill
             className="object-cover h-full w-full transition-opacity duration-500"
             priority
             quality={100}
+            onLoad={handleImageLoad}
           />
+
+          {/* Preload next image */}
+          {/* {nextImageSrc && (
+            <Image
+              src={nextImageSrc}
+              alt="Preloading next image"
+              width={1}
+              height={1}
+              className="opacity-0 absolute"
+              onLoad={() => {
+                setNextImageLoaded(true);
+                // If video has ended and we're waiting for the image to load, hide the video now
+                if (videoRef.current && videoRef.current.ended) {
+                  setShowingVideo(false);
+                }
+              }}
+            />
+          )} */}
 
           {showingVideo && (
             <video
               ref={videoRef}
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay
-              onPlay={() => {
-                if (direction === "forward") {
-                  setTimeout(() => {
-                    setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
-                  }, 50);
-                }
-              }}
               onEnded={handleVideoEnd}
             >
               <source src={getCurrentVideo()} type="video/mp4" />

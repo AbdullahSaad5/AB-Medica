@@ -211,9 +211,9 @@ const Benefits = () => {
     const newImage = isPlayingReverse ? DEFAULT_IMAGE : selectedHotspot.stillImage;
 
     // Small delay to ensure timing with video
-    setTimeout(() => {
-      setCurrentImage(newImage);
-    }, 50);
+    // setTimeout(() => {
+    setCurrentImage(newImage);
+    // }, 50);
   }, [selectedHotspot, isPlayingReverse, DEFAULT_IMAGE]);
 
   const handleNavigateBack = useCallback(() => {

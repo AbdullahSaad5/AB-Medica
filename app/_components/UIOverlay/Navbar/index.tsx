@@ -42,7 +42,7 @@ const Navbar = () => {
               href={button.href}
               key={index}
               // onClick={button.onClick}
-              className={`px-2 py-1 sm:px-4 sm:py-1.5 md:px-6 md:py-2 lg:px-[1vw] lg:py-[1vh] rounded-xl text-sm sm:text-base md:text-lg lg:text-[2.25vh] ${
+              className={`px-2 py-1 sm:px-4 sm:py-1.5 md:px-6 md:py-2 lg:px-[1vw] lg:py-[1vh] rounded-xl text-sm sm:text-base md:text-lg lg:text-[2.25vh] hover:bg-primary hover:text-white ${
                 activeTab === button.label ? "bg-primary text-white" : "bg-transparent text-primary"
               }`}
             >
