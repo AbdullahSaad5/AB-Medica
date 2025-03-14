@@ -46,40 +46,97 @@ const Setup = () => {
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [isLoading, setIsLoading] = useState(true);
   const [nextImageLoaded, setNextImageLoaded] = useState(false);
-  const [nextImageSrc, setNextImageSrc] = useState<string>(images[currentIndex]);
+  const [nextImageSrc, setNextImageSrc] = useState<string>(images[0]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const preloadedImages = useRef<HTMLImageElement[]>([]);
   const preloadedVideos = useRef<HTMLVideoElement[]>([]);
   const router = useRouter();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Preload all assets on component mount
   useEffect(() => {
     let loadedImages = 0;
     let loadedVideos = 0;
     const totalAssets = images.length + forwardVideos.length + backwardVideos.length;
 
+    const handleAssetLoad = () => {
+      if (loadedImages + loadedVideos === totalAssets) {
+        setIsLoading(false);
+      }
+    };
+
+    // Preload images
     images.forEach((src, index) => {
       const img = new window.Image();
-      img.src = src;
       img.onload = () => {
         loadedImages++;
-        if (loadedImages + loadedVideos === totalAssets) {
-          setIsLoading(false);
-        }
+        handleAssetLoad();
       };
+      img.onerror = () => {
+        loadedImages++;
+        handleAssetLoad();
+        console.error(`Failed to load image: ${src}`);
+      };
+      img.src = src;
       preloadedImages.current[index] = img;
     });
 
-    [...forwardVideos, ...backwardVideos].forEach((src, index) => {
+    // Preload videos - Safari needs special handling
+    const preloadVideo = (src: string, index: number, isForward: boolean) => {
       const video = document.createElement("video");
+      video.preload = "auto"; // Explicitly set preload
+
+      // Add event listeners before setting src (important for Safari)
+      video.addEventListener(
+        "canplaythrough",
+        () => {
+          loadedVideos++;
+          handleAssetLoad();
+        },
+        { once: true }
+      );
+
+      video.addEventListener(
+        "error",
+        () => {
+          loadedVideos++;
+          handleAssetLoad();
+          console.error(`Failed to load video: ${src}`);
+        },
+        { once: true }
+      );
+
+      // For Safari compatibility, add these attributes
+      video.playsInline = true;
+      video.muted = true;
+
+      // Set the source
       video.src = src;
-      video.oncanplaythrough = () => {
-        loadedVideos++;
-        if (loadedImages + loadedVideos === totalAssets) {
-          setIsLoading(false);
-        }
-      };
-      preloadedVideos.current[index] = video;
+
+      // Store reference
+      const arrayIndex = isForward ? index : index + forwardVideos.length;
+      preloadedVideos.current[arrayIndex] = video;
+
+      // Force load for Safari
+      video.load();
+    };
+
+    // Preload forward videos
+    forwardVideos.forEach((src, index) => {
+      preloadVideo(src, index, true);
     });
+
+    // Preload backward videos
+    backwardVideos.forEach((src, index) => {
+      preloadVideo(src, index, false);
+    });
+
+    return () => {
+      // Clear any pending timeouts when component unmounts
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   // Reset nextImageLoaded when current index changes
@@ -87,70 +144,127 @@ const Setup = () => {
     setNextImageLoaded(false);
   }, [currentIndex]);
 
-  const getCurrentVideo = () => {
+  // Handle video playback and cleanup
+  useEffect(() => {
+    if (showingVideo && videoRef.current) {
+      const video = videoRef.current;
+
+      // For Safari: ensure video is ready to play
+      const playVideo = () => {
+        try {
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              console.error("Video play error:", error);
+              // If autoplay fails, try again with user interaction simulation
+              setTimeout(() => {
+                video.play().catch((e) => console.error("Retry play failed:", e));
+              }, 300);
+            });
+          }
+        } catch (error) {
+          console.error("Error playing video:", error);
+        }
+      };
+
+      // Safari sometimes needs a moment to properly initialize the video
+      setTimeout(playVideo, 100);
+
+      // Handle cleanup
+      return () => {
+        if (video) {
+          video.pause();
+          video.currentTime = 0;
+        }
+      };
+    }
+  }, [showingVideo]);
+
+  const getCurrentVideo = (): string => {
     return direction === "forward" ? forwardVideos[currentIndex] : backwardVideos[currentIndex];
   };
 
-  const handleNext = () => {
+  const preloadNextImage = (index: number): void => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    setNextImageLoaded(false);
+
+    // Use a longer timeout for Safari
+    timeoutRef.current = setTimeout(() => {
+      if (index >= 0 && index < images.length) {
+        setNextImageSrc(images[index]);
+        console.log(`Preloading image at index ${index}:`, images[index]);
+      }
+    }, 200); // Increased from 50ms to 200ms for Safari compatibility
+  };
+
+  const handleNext = (): void => {
     if (currentIndex === images.length - 1) {
       router.push("/benefits");
       return;
     }
 
     if (!showingVideo && currentIndex < images.length - 1) {
-      // Start preloading the next image if going forward
-      if (currentIndex + 1 < images.length) {
-        console.log("Preloading next image");
-        setNextImageLoaded(false);
-        setTimeout(() => {
-          setNextImageSrc(images[currentIndex + 1]);
-        }, 50);
-        console.log("images[currentIndex + 1]", images[currentIndex + 1]);
-      }
+      // Preload the next image
+      const nextIndex = currentIndex + 1;
+      preloadNextImage(nextIndex);
 
       setDirection("forward");
       setShowingVideo(true);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = (): void => {
     if (!showingVideo && currentIndex > 0) {
-      const newIndex = currentIndex - 1;
+      const prevIndex = currentIndex - 1;
 
       // Preload the previous image
-      setNextImageLoaded(false);
-      console.log("images[newIndex]", images[newIndex]);
-      setTimeout(() => {
-        setNextImageSrc(images[newIndex]);
-      }, 50);
+      preloadNextImage(prevIndex);
 
-      setCurrentIndex(newIndex);
+      setCurrentIndex(prevIndex);
       setDirection("backward");
       setShowingVideo(true);
     }
   };
 
-  const handleVideoEnd = () => {
-    if (direction === "forward") {
-      // Update the current index when video ends
-      setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+  const handleVideoEnd = (): void => {
+    console.log("Video ended, direction:", direction);
 
-      // Only hide the video when the next image is loaded
-      if (nextImageLoaded) {
-        setShowingVideo(false);
-      }
+    if (direction === "forward") {
+      // Update the current index when video ends for forward direction
+      setCurrentIndex((prev) => Math.min(images.length - 1, prev + 1));
+    }
+
+    // If the next image is loaded, hide the video
+    if (nextImageLoaded) {
+      console.log("Next image is loaded, hiding video");
+      setShowingVideo(false);
     } else {
-      // For backward direction, just hide the video once it ends and image is loaded
-      if (nextImageLoaded) {
+      console.log("Next image not loaded yet, waiting...");
+      // Set a fallback timeout in case the image load event doesn't fire
+      timeoutRef.current = setTimeout(() => {
+        console.log("Fallback timeout triggered, hiding video");
         setShowingVideo(false);
-      }
+      }, 500);
     }
   };
 
-  const handleImageLoad = () => {
+  const handleImageLoad = (): void => {
+    console.log("Image loaded");
     setNextImageLoaded(true);
-    // If video has already ended, we can now hide it
-    if (videoRef.current && videoRef.current.ended) {
+
+    // Clear any fallback timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    // Check if video has already ended, we can now hide it
+    if (videoRef.current && (videoRef.current.ended || videoRef.current.paused)) {
+      console.log("Video has ended, hiding it now that image is loaded");
       setShowingVideo(false);
     }
   };
@@ -163,39 +277,31 @@ const Setup = () => {
         <>
           {/* Current image */}
           <Image
-            src={nextImageSrc as string}
+            src={nextImageSrc}
             alt={`Step ${currentIndex}`}
             fill
             className="object-cover h-full w-full transition-opacity duration-500"
             priority
             quality={100}
             onLoad={handleImageLoad}
+            onError={() => {
+              console.error("Failed to load image:", nextImageSrc);
+              setNextImageLoaded(true); // Ensure we don't get stuck
+            }}
           />
-
-          {/* Preload next image */}
-          {/* {nextImageSrc && (
-            <Image
-              src={nextImageSrc}
-              alt="Preloading next image"
-              width={1}
-              height={1}
-              className="opacity-0 absolute"
-              onLoad={() => {
-                setNextImageLoaded(true);
-                // If video has ended and we're waiting for the image to load, hide the video now
-                if (videoRef.current && videoRef.current.ended) {
-                  setShowingVideo(false);
-                }
-              }}
-            />
-          )} */}
 
           {showingVideo && (
             <video
               ref={videoRef}
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay
+              playsInline
+              muted
               onEnded={handleVideoEnd}
+              onError={(e) => {
+                console.error("Video error:", e);
+                handleVideoEnd(); // Ensure we don't get stuck
+              }}
             >
               <source src={getCurrentVideo()} type="video/mp4" />
               Your browser does not support the video tag.
