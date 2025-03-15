@@ -60,7 +60,6 @@ const Setup = () => {
       setDirection("forward");
       setCurrentVideoIndex(currentImageIndex);
       setShowingVideo(true);
-      // setIsImageLoaded(false);
     }
   };
 
@@ -69,7 +68,6 @@ const Setup = () => {
       setDirection("backward");
       setCurrentVideoIndex(currentImageIndex - 1);
       setShowingVideo(true);
-      // setIsImageLoaded(false);
     }
   };
 
@@ -100,8 +98,6 @@ const Setup = () => {
           priority
           quality={100}
           onLoad={() => {
-            // setIsLoading(false);
-            // setIsImageLoaded(true);
             setAllLoaded((prev) => {
               const newLoaded = [...prev];
               newLoaded[index] = true;
@@ -116,15 +112,18 @@ const Setup = () => {
 
       <video
         ref={videoRef}
-        key={currentVideoSrc}
         className={`absolute inset-0 w-full h-full object-cover ${showingVideo ? "visible" : "invisible"}`}
         playsInline
         muted
         onPlay={() => {
           if (direction === "forward") {
-            setCurrentImageIndex((prevIndex) => prevIndex + 1);
+            setTimeout(() => {
+              setCurrentImageIndex((prevIndex) => prevIndex + 1);
+            }, 100);
           } else {
-            setCurrentImageIndex((prevIndex) => prevIndex - 1);
+            setTimeout(() => {
+              setCurrentImageIndex((prevIndex) => prevIndex - 1);
+            }, 100);
           }
         }}
         onEnded={() => {
