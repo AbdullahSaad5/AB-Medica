@@ -84,6 +84,13 @@ const Setup = () => {
     }
   }, [showingVideo, currentVideoSrc]);
 
+  console.log("currentImageIndex", currentImageIndex);
+  console.log("currentVideoIndex", currentVideoIndex);
+  console.log("allLoaded", allLoaded);
+  console.log("showingVideo", showingVideo);
+  console.log("direction", direction);
+  console.log("currentVideoSrc", currentVideoSrc);
+
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
       {allLoaded.some((loaded) => !loaded) && <LoadingScreen />}
