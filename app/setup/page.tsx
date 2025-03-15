@@ -75,9 +75,7 @@ const Setup = () => {
     direction === "forward" ? forwardVideos[currentVideoIndex] : backwardVideos[currentVideoIndex];
 
   useEffect(() => {
-    console.log("useEffect");
     if (videoRef.current && showingVideo) {
-      console.log("Video ref found and showingVideo is true");
       videoRef.current.load();
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch((error) => {
@@ -85,13 +83,6 @@ const Setup = () => {
       });
     }
   }, [showingVideo, currentVideoSrc]);
-
-  console.log("currentImageIndex", currentImageIndex);
-  console.log("currentVideoIndex", currentVideoIndex);
-  console.log("allLoaded", allLoaded);
-  console.log("showingVideo", showingVideo);
-  console.log("direction", direction);
-  console.log("currentVideoSrc", currentVideoSrc);
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
@@ -126,8 +117,10 @@ const Setup = () => {
         muted
         onCanPlayThrough={() => {
           if (direction === "forward") {
+            console.log("forward");
             setCurrentImageIndex((prevIndex) => prevIndex + 1);
-          } else {
+          } else if (direction === "backward") {
+            console.log("backward");
             setCurrentImageIndex((prevIndex) => prevIndex - 1);
           }
         }}
