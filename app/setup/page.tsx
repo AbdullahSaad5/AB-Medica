@@ -47,6 +47,7 @@ const Setup = () => {
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const videoRef = useRef<HTMLVideoElement>(null);
   const [allLoaded, setAllLoaded] = useState(Array(images.length).fill(false));
+  const [videoStarted, setVideoStarted] = useState(false);
 
   const router = useRouter();
 
@@ -60,6 +61,7 @@ const Setup = () => {
       setDirection("forward");
       setCurrentVideoIndex(currentImageIndex);
       setShowingVideo(true);
+      setVideoStarted(false);
     }
   };
 
@@ -68,6 +70,7 @@ const Setup = () => {
       setDirection("backward");
       setCurrentVideoIndex(currentImageIndex - 1);
       setShowingVideo(true);
+      setVideoStarted(false);
     }
   };
 
@@ -83,6 +86,36 @@ const Setup = () => {
       });
     }
   }, [showingVideo, currentVideoSrc]);
+
+  // Handle video playback events
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => {
+      setVideoStarted(true);
+    };
+
+    const handleCanPlayThrough = () => {
+      if (videoStarted && showingVideo) {
+        if (direction === "forward") {
+          console.log("forward - changing image after video starts");
+          setCurrentImageIndex((prevIndex) => prevIndex + 1);
+        } else if (direction === "backward") {
+          console.log("backward - changing image after video starts");
+          setCurrentImageIndex((prevIndex) => prevIndex - 1);
+        }
+      }
+    };
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("canplaythrough", handleCanPlayThrough);
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("canplaythrough", handleCanPlayThrough);
+    };
+  }, [videoStarted, direction, showingVideo]);
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
@@ -115,21 +148,14 @@ const Setup = () => {
         className={`absolute inset-0 w-full h-full object-cover ${showingVideo ? "visible" : "invisible"}`}
         playsInline
         muted
-        onCanPlayThrough={() => {
-          if (direction === "forward") {
-            console.log("forward");
-            setCurrentImageIndex((prevIndex) => prevIndex + 1);
-          } else if (direction === "backward") {
-            console.log("backward");
-            setCurrentImageIndex((prevIndex) => prevIndex - 1);
-          }
-        }}
         onEnded={() => {
           setShowingVideo(false);
+          setVideoStarted(false);
         }}
         onError={(e) => {
           console.error("Video error:", e);
           setShowingVideo(false);
+          setVideoStarted(false);
         }}
       >
         <source src={currentVideoSrc} type="video/mp4" />
