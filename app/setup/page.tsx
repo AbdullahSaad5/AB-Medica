@@ -75,7 +75,9 @@ const Setup = () => {
     direction === "forward" ? forwardVideos[currentVideoIndex] : backwardVideos[currentVideoIndex];
 
   useEffect(() => {
+    console.log("useEffect");
     if (videoRef.current && showingVideo) {
+      console.log("Video ref found and showingVideo is true");
       videoRef.current.load();
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch((error) => {
