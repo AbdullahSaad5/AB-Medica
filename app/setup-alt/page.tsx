@@ -115,15 +115,22 @@ const Setup = () => {
         className={`absolute inset-0 w-full h-full object-cover ${showingVideo ? "visible" : "invisible"}`}
         playsInline
         muted
-        onPlay={() => {
+        // onPlay={() => {
+        //   if (direction === "forward") {
+        //     setTimeout(() => {
+        //       setCurrentImageIndex((prevIndex) => prevIndex + 1);
+        //     }, 100);
+        //   } else {
+        //     setTimeout(() => {
+        //       setCurrentImageIndex((prevIndex) => prevIndex - 1);
+        //     }, 100);
+        //   }
+        // }}
+        onCanPlayThrough={() => {
           if (direction === "forward") {
-            setTimeout(() => {
-              setCurrentImageIndex((prevIndex) => prevIndex + 1);
-            }, 100);
+            setCurrentImageIndex((prevIndex) => prevIndex + 1);
           } else {
-            setTimeout(() => {
-              setCurrentImageIndex((prevIndex) => prevIndex - 1);
-            }, 100);
+            setCurrentImageIndex((prevIndex) => prevIndex - 1);
           }
         }}
         onEnded={() => {
