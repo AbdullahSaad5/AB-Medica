@@ -8,7 +8,7 @@ import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
 import { useFrame } from "@react-three/fiber";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
-const MODEL_PATH = "./models/dolphin_manipolo-1.glb";
+const MODEL_PATH = "/models/dolphin-manipolo-1.glb";
 
 const Nozel = ({ isVisible }: { isVisible: boolean }) => {
   const result = useGLTF(MODEL_PATH);
