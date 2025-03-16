@@ -8,8 +8,10 @@ import type { Group } from "three";
 import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
+const MODEL_PATH = "./models/Corpo Dolphin.glb";
+
 const Machine = ({ isVisible }: { isVisible: boolean }) => {
-  const result = useGLTF("./models/Corpo Dolphin.glb");
+  const result = useGLTF(MODEL_PATH);
   const modelRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
   const { handleSetActiveComponent, activeComponent } = useActiveComponent();
@@ -73,6 +75,6 @@ const Machine = ({ isVisible }: { isVisible: boolean }) => {
 };
 
 // Preload the model
-useGLTF.preload("./models/Corpo Dolphin.glb");
+useGLTF.preload(MODEL_PATH);
 
 export default Machine;
