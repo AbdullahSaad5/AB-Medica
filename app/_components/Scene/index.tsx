@@ -1,9 +1,4 @@
-import {
-  Environment,
-  // Html,
-  OrbitControls,
-  PerspectiveCamera,
-} from "@react-three/drei";
+import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -153,51 +148,6 @@ const Scene = () => {
     }
   });
 
-  // Button click: compute and log the camera offsets (reverse the math)
-  // const handleGetCameraInfo = () => {
-  //   if (!groupRef.current) {
-  //     console.warn("Group reference not available.");
-  //     return;
-  //   }
-  //   // Compute the center of the group
-  //   const box = new THREE.Box3();
-  //   box.setFromObject(groupRef.current);
-  //   const center = new THREE.Vector3();
-  //   box.getCenter(center);
-
-  //   // Calculate relative camera position: offset = camera.position - center
-  //   const relativePosition = new THREE.Vector3().subVectors(camera.position, center);
-
-  //   // Calculate relative target: offset = controls.target - center
-  //   if (!controlsRef.current) {
-  //     console.warn("Controls reference not available.");
-  //     return;
-  //   }
-  //   // @ts-expect-error target is private
-  //   const relativeTarget = new THREE.Vector3().subVectors(controlsRef.current.target, center);
-
-  //   // Log the values in a format to copy into cameraViews
-  //   console.log("New camera view:");
-  //   console.log(
-  //     "position: new THREE.Vector3(" +
-  //       relativePosition.x.toFixed(3) +
-  //       ", " +
-  //       relativePosition.y.toFixed(3) +
-  //       ", " +
-  //       relativePosition.z.toFixed(3) +
-  //       "),"
-  //   );
-  //   console.log(
-  //     "target: new THREE.Vector3(" +
-  //       relativeTarget.x.toFixed(3) +
-  //       ", " +
-  //       relativeTarget.y.toFixed(3) +
-  //       ", " +
-  //       relativeTarget.z.toFixed(3) +
-  //       "),"
-  //   );
-  // };
-
   // Assume you have a cameraViews object that defines a zoomFactor for each component
   useEffect(() => {
     const view = activeComponent ? cameraViews[activeComponent] : cameraViews.default;
@@ -234,13 +184,6 @@ const Scene = () => {
       <EffectComposer>
         <Vignette offset={0.5} darkness={0.5} eskil={false} />
       </EffectComposer>
-
-      {/* Button overlay for retrieving camera info */}
-      {/* <Html position={[0, 1, 0]}>
-        <div style={{ position: "absolute", top: 20, left: 20, zIndex: 1 }}>
-          <button onClick={handleGetCameraInfo}>Get Camera Info</button>
-        </div>
-      </Html> */}
     </>
   );
 };
