@@ -172,12 +172,14 @@ const Scene = () => {
       <OrbitControls
         ref={controlsRef}
         // enablePan={false}
+        enableDamping
         dampingFactor={0.1}
         zoomSpeed={1}
         minPolarAngle={0.3}
         maxPolarAngle={Math.PI / 1.1}
         maxDistance={(activeComponent ? cameraViews[activeComponent] : cameraViews.default).maxDistance}
         minDistance={(activeComponent ? cameraViews[activeComponent] : cameraViews.default).minDistance}
+        makeDefault
       />
       <Environment preset="city" />
 

@@ -13,7 +13,16 @@ export default function Home() {
       <Suspense fallback={<LoadingScreen />} unstable_expectedLoadTime={3000}>
         <ActiveComponentProvider>
           <UIOverlay />
-          <Canvas shadows>
+          <Canvas
+            shadows
+            gl={{
+              antialias: true,
+              powerPreference: "high-performance",
+              alpha: false,
+              preserveDrawingBuffer: true,
+            }}
+            dpr={[1, 2]}
+          >
             <Scene />
           </Canvas>
         </ActiveComponentProvider>
