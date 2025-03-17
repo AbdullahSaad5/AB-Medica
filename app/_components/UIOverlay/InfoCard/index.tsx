@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import VideoPlayer from "../../VideoPlayer";
 import PDFViewer from "../../PDFViewer";
+import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 type Button = {
   text: string;
@@ -14,6 +15,7 @@ const InfoCard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedButton, setSelectedButton] = useState<Button | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { componentsData } = useActiveComponent();
 
   const handleVideoEnd = () => {
     if (selectedButton?.resourceType === "video") {
@@ -47,10 +49,12 @@ const InfoCard = () => {
   return (
     <div className="mt-[calc(10vh+2rem)] flex w-full justify-end z-10">
       <div className="w-[50vw] lg:w-[35vw] bg-white/75  rounded-3xl shadow-lg py-[3vh] px-[2.2vw] space-y-1  lg:space-y-3  pointer-events-auto">
-        <p className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl text-primary font-semibold">Dolphin</p>
+        <p className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl text-primary font-semibold">
+          {componentsData?.mainData.title || "Dolphin"}
+        </p>
         <p className="text-md sm:text-lg  lg:text-[2.2vh] text-black">
-          Dolphin è un dispositivo medico brevettato per l&apos;interventistica laparoscopica, mini-laparoscopica e
-          robotica.{" "}
+          {componentsData?.mainData.description ||
+            "Dolphin è un dispositivo medico brevettato per l'interventistica laparoscopica, mini-laparoscopica e robotica."}
         </p>
         <div className="flex items-center justify-center flex-wrap gap-2 lg:gap-4 ">
           {buttons.map((button, index) => (

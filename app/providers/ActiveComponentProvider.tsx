@@ -1,4 +1,5 @@
 import React from "react";
+import useAxios from "../hooks/useAxios";
 
 export type ActiveComponent = "stand" | "nozel" | "machine" | "device" | null;
 
@@ -10,6 +11,19 @@ type ActiveComponentContextType = {
   scaleFactor: number;
   showComponentDetails: boolean;
   setShowComponentDetails: React.Dispatch<React.SetStateAction<boolean>>;
+  componentsData: ComponentsData | null;
+  setComponentsData: React.Dispatch<React.SetStateAction<ComponentsData | null>>;
+  loading: boolean;
+};
+type ComponentsData = {
+  mainData: {
+    title: string;
+    description: string;
+  };
+  overviewDialogsData: {
+    title: string;
+    description: string;
+  }[];
 };
 
 const ActiveComponentContext = React.createContext({} as ActiveComponentContextType);
@@ -20,6 +34,17 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const scaleFactor = 0.5 / zoomLevel;
   const maxScale = 1.5;
+  const [componentsData, setComponentsData] = React.useState<ComponentsData | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  const { getComponentsData } = useAxios();
+
+  React.useEffect(() => {
+    getComponentsData().then((data) => {
+      setComponentsData(data);
+      setLoading(false);
+    });
+  }, []);
 
   const handleSetActiveComponent = (component: ActiveComponent) => {
     if (activeComponent === component) {
@@ -40,6 +65,9 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
         scaleFactor: scaleFactor > maxScale ? maxScale : scaleFactor,
         showComponentDetails,
         setShowComponentDetails,
+        componentsData,
+        setComponentsData,
+        loading,
       }}
     >
       {children}

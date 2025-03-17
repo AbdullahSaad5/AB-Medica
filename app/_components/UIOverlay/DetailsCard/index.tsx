@@ -31,15 +31,16 @@ const DetailsCard = () => {
     },
   ];
 
-  const { activeComponent } = useActiveComponent();
+  const { activeComponent, componentsData } = useActiveComponent();
 
   const selectedContent = content.find((c) => c.part === activeComponent);
+  const selectedIndex = content.findIndex((c) => c.part === activeComponent);
 
   return (
     <div className="mt-[calc(10vh+2rem)] flex w-full justify-start items-stretch z-10">
       <div className="w-[50vw] lg:w-[35vw] bg-white/75 rounded-3xl shadow-lg py-[2vh] px-4 sm:px-[2.2vw] space-y-3  pointer-events-auto">
         <p className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl text-primary font-semibold">
-          {selectedContent?.title}
+          {componentsData?.overviewDialogsData[selectedIndex].title || selectedContent?.title}
         </p>
         <p className="text-md sm:text-lg  lg:text-[2.2vh] text-black">{selectedContent?.description}</p>
       </div>

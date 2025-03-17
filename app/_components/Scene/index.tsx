@@ -1,3 +1,5 @@
+"use client";
+
 import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
