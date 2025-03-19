@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import "./globals.css";
 import Navbar from "./_components/UIOverlay/Navbar";
+import "./polyfills";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
