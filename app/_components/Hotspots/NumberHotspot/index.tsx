@@ -18,10 +18,10 @@ const NumberHotspot = ({
   return (
     <div
       className={cn(
-        "w-[60px] h-[60px] rounded-full border-4 border-white absolute grid place-items-center cursor-pointer",
+        "w-[60px] h-[60px] rounded-full border-4 border-white absolute grid place-items-center cursor-pointer text-white",
         color === "white"
           ? "border-white hover:bg-primary hover:border-primary"
-          : "border-secondary hover:bg-secondary hover:text-white"
+          : "border-secondary hover:bg-secondary hover:text-primary"
       )}
       style={{
         top: `${position.y}%`,
