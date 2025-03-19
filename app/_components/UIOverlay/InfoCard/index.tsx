@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import VideoPlayer from "../../VideoPlayer";
-// import PDFViewer from "../../PDFViewer";
+import PDFViewer from "../../PDFViewer";
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 type Button = {
@@ -79,13 +79,13 @@ const InfoCard = () => {
           handleVideoEnd={handleVideoEnd}
         />
       )}
-      {/* {modalOpen && selectedButton && selectedButton.resourceType === "pdf" && (
+      {modalOpen && selectedButton && selectedButton.resourceType === "pdf" && (
         <PDFViewer
           // pdfUrl={"https://cdn.filestackcontent.com/wcrjf9qPTCKXV3hMXDwK"}
           pdfUrl={selectedButton?.src as string}
           handleCloseModal={() => setModalOpen(false)}
         />
-      )} */}
+      )}
     </div>
   );
 };
