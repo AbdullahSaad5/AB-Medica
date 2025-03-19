@@ -40,13 +40,13 @@ const Nozel = ({ isVisible }: { isVisible: boolean }) => {
         label: "Tasti di azionamento",
         positionAdjustments: [-0.01, -0.015, 0],
       },
-      {
-        name: "CANULA_2001",
-        label: "Canula 2001",
-      },
+      // {
+      //   name: "CANULA_2001",
+      //   label: "Canula 2001",
+      // },
       {
         name: "CANULA_2002",
-        label: "Canula",
+        label: "Cannula",
       },
     ],
   });
