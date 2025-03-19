@@ -8,12 +8,17 @@ import type { Group } from "three";
 import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
+const MODEL_PATH = "/models/corpo-dolphin.glb";
+
 const Machine = ({ isVisible }: { isVisible: boolean }) => {
-  const result = useGLTF("./models/Corpo Dolphin.glb");
   const modelRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
   const { handleSetActiveComponent, activeComponent } = useActiveComponent();
   const isActive = activeComponent === "machine";
+
+  const result = useGLTF(MODEL_PATH, undefined, undefined, (error) => {
+    console.error("Error loading machine model:", error);
+  });
 
   const { mixer, isAnimationPlaying } = useAnimationMixer({
     modelRef,
@@ -39,6 +44,11 @@ const Machine = ({ isVisible }: { isVisible: boolean }) => {
       mixer.current.update(1 / 60);
     }
   });
+
+  if (!result.scene) {
+    console.warn("Machine model scene not loaded");
+    return null;
+  }
 
   return isVisible ? (
     <group ref={groupRef}>
@@ -73,6 +83,6 @@ const Machine = ({ isVisible }: { isVisible: boolean }) => {
 };
 
 // Preload the model
-useGLTF.preload("./models/Corpo Dolphin.glb");
+useGLTF.preload(MODEL_PATH);
 
 export default Machine;

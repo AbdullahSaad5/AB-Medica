@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import LoadingScreen from "../_components/LoadingScreen";
 
 const images = [
@@ -41,316 +41,145 @@ const backwardVideos = [
 ];
 
 const Setup = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [targetIndex, setTargetIndex] = useState(0);
-  const [videoIndex, setVideoIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [showingVideo, setShowingVideo] = useState(false);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
-  const [isLoading, setIsLoading] = useState(true);
-  const [nextImageLoaded, setNextImageLoaded] = useState(false);
-  const [nextImageSrc, setNextImageSrc] = useState<string>(images[0]);
-  const [currentVideoSrc, setCurrentVideoSrc] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
-  const preloadedImages = useRef<HTMLImageElement[]>([]);
-  const preloadedVideos = useRef<HTMLVideoElement[]>([]);
+  const [allLoaded, setAllLoaded] = useState(Array(images.length).fill(false));
+  const [videoStarted, setVideoStarted] = useState(false);
+
   const router = useRouter();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Preload all assets on component mount
-  useEffect(() => {
-    let loadedImages = 0;
-    let loadedVideos = 0;
-    const totalAssets = images.length + forwardVideos.length + backwardVideos.length;
-
-    const handleAssetLoad = () => {
-      if (loadedImages + loadedVideos === totalAssets) {
-        setIsLoading(false);
-      }
-    };
-
-    // Preload images
-    images.forEach((src, index) => {
-      const img = new window.Image();
-      img.onload = () => {
-        loadedImages++;
-        handleAssetLoad();
-      };
-      img.onerror = () => {
-        loadedImages++;
-        handleAssetLoad();
-        console.error(`Failed to load image: ${src}`);
-      };
-      img.src = src;
-      preloadedImages.current[index] = img;
-    });
-
-    // Preload videos - Safari needs special handling
-    const preloadVideo = (src: string, index: number, isForward: boolean) => {
-      const video = document.createElement("video");
-      video.preload = "auto"; // Explicitly set preload
-
-      // Add event listeners before setting src (important for Safari)
-      video.addEventListener(
-        "canplaythrough",
-        () => {
-          loadedVideos++;
-          handleAssetLoad();
-        },
-        { once: true }
-      );
-
-      video.addEventListener(
-        "error",
-        () => {
-          loadedVideos++;
-          handleAssetLoad();
-          console.error(`Failed to load video: ${src}`);
-        },
-        { once: true }
-      );
-
-      // For Safari compatibility, add these attributes
-      video.playsInline = true;
-      video.muted = true;
-
-      // Set the source
-      video.src = src;
-
-      // Store reference
-      const arrayIndex = isForward ? index : index + forwardVideos.length;
-      preloadedVideos.current[arrayIndex] = video;
-
-      // Force load for Safari
-      video.load();
-    };
-
-    // Preload forward videos
-    forwardVideos.forEach((src, index) => {
-      preloadVideo(src, index, true);
-    });
-
-    // Preload backward videos
-    backwardVideos.forEach((src, index) => {
-      preloadVideo(src, index, false);
-    });
-
-    return () => {
-      // Clear any pending timeouts when component unmounts
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Reset nextImageLoaded when current index changes
-  useEffect(() => {
-    setNextImageLoaded(false);
-    setTargetIndex(currentIndex);
-  }, [currentIndex]);
-
-  // Update video src when showing video or direction changes
-  useEffect(() => {
-    if (showingVideo) {
-      const videoSrc = direction === "forward" ? forwardVideos[videoIndex] : backwardVideos[videoIndex];
-
-      setCurrentVideoSrc(videoSrc);
-      console.log(
-        `Setting video source to: ${videoSrc} (${direction} video index: ${videoIndex}, current index: ${currentIndex}, target index: ${targetIndex})`
-      );
-    }
-  }, [showingVideo, direction, videoIndex, currentIndex, targetIndex]);
-
-  // Handle video playback and cleanup
-  useEffect(() => {
-    if (showingVideo && videoRef.current) {
-      const video = videoRef.current;
-
-      // When the video source changes, we need to load the new source
-      if (video.src !== currentVideoSrc && currentVideoSrc) {
-        video.src = currentVideoSrc;
-        video.load();
-      }
-
-      // For Safari: ensure video is ready to play
-      const playVideo = () => {
-        try {
-          const playPromise = video.play();
-          if (playPromise !== undefined) {
-            playPromise.catch((error) => {
-              console.error("Video play error:", error);
-              // If autoplay fails, try again with user interaction simulation
-              setTimeout(() => {
-                video.play().catch((e) => console.error("Retry play failed:", e));
-              }, 300);
-            });
-          }
-        } catch (error) {
-          console.error("Error playing video:", error);
-        }
-      };
-
-      // Safari sometimes needs a moment to properly initialize the video
-      setTimeout(playVideo, 100);
-
-      // Handle cleanup
-      return () => {
-        if (video) {
-          video.pause();
-          video.currentTime = 0;
-        }
-      };
-    }
-  }, [showingVideo, currentVideoSrc]);
-
-  const preloadNextImage = (index: number): void => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    setNextImageLoaded(false);
-
-    // Use a longer timeout for Safari
-    timeoutRef.current = setTimeout(() => {
-      if (index >= 0 && index < images.length) {
-        setNextImageSrc(images[index]);
-        console.log(`Preloading image at index ${index}:`, images[index]);
-      }
-    }, 200); // Increased from 50ms to 200ms for Safari compatibility
-  };
 
   const handleNext = (): void => {
-    if (currentIndex === images.length - 1) {
+    if (currentImageIndex === images.length - 1) {
       router.push("/benefits");
       return;
     }
 
-    if (!showingVideo && currentIndex < images.length - 1) {
-      // Calculate the target index we're heading to
-      const nextIndex = currentIndex + 1;
-      setTargetIndex(nextIndex);
-
-      // Set the video index to the current index for forward navigation
-      setVideoIndex(currentIndex);
-
-      // Preload the next image
-      preloadNextImage(nextIndex);
-
+    if (!showingVideo && currentImageIndex < images.length - 1) {
       setDirection("forward");
+      setCurrentVideoIndex(currentImageIndex);
       setShowingVideo(true);
+      setVideoStarted(false);
     }
   };
 
   const handlePrevious = (): void => {
-    if (!showingVideo && currentIndex > 0) {
-      // Calculate the target index we're heading to
-      const prevIndex = currentIndex - 1;
-      setTargetIndex(prevIndex);
-
-      // Set the video index to the previous index for backward navigation
-      setVideoIndex(prevIndex);
-
-      // Preload the previous image
-      preloadNextImage(prevIndex);
-
+    if (!showingVideo && currentImageIndex > 0) {
       setDirection("backward");
+      setCurrentVideoIndex(currentImageIndex - 1);
       setShowingVideo(true);
+      setVideoStarted(false);
     }
   };
 
-  const handleVideoEnd = (): void => {
-    console.log("Video ended, direction:", direction);
+  const currentVideoSrc =
+    direction === "forward" ? forwardVideos[currentVideoIndex] : backwardVideos[currentVideoIndex];
 
-    // Update the current index when video ends
-    setCurrentIndex(targetIndex);
-
-    // If the next image is loaded, hide the video
-    if (nextImageLoaded) {
-      console.log("Next image is loaded, hiding video");
-      setShowingVideo(false);
-    } else {
-      console.log("Next image not loaded yet, waiting...");
-      // Set a fallback timeout in case the image load event doesn't fire
-      timeoutRef.current = setTimeout(() => {
-        console.log("Fallback timeout triggered, hiding video");
-        setShowingVideo(false);
-      }, 500);
+  useEffect(() => {
+    if (videoRef.current && showingVideo) {
+      videoRef.current.load();
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch((error) => {
+        console.error("Error playing video:", error);
+      });
     }
-  };
+  }, [showingVideo, currentVideoSrc]);
 
-  const handleImageLoad = (): void => {
-    console.log("Image loaded");
-    setNextImageLoaded(true);
+  // Handle video playback events
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
-    // Clear any fallback timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    const handlePlay = () => {
+      setVideoStarted(true);
+    };
 
-    // Check if video has already ended, we can now hide it
-    if (videoRef.current && (videoRef.current.ended || videoRef.current.paused)) {
-      console.log("Video has ended, hiding it now that image is loaded");
-      setShowingVideo(false);
-    }
-  };
+    const handleCanPlayThrough = () => {
+      if (videoStarted && showingVideo) {
+        if (direction === "forward") {
+          console.log("forward - changing image after video starts");
+          setCurrentImageIndex((prevIndex) => prevIndex + 1);
+        } else if (direction === "backward") {
+          console.log("backward - changing image after video starts");
+          setCurrentImageIndex((prevIndex) => prevIndex - 1);
+        }
+      }
+    };
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("canplaythrough", handleCanPlayThrough);
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("canplaythrough", handleCanPlayThrough);
+    };
+  }, [videoStarted, direction, showingVideo]);
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {isLoading ? (
-        <LoadingScreen />
-      ) : (
-        <>
-          {/* Current image */}
-          <Image
-            src={nextImageSrc}
-            alt={`Step ${currentIndex}`}
-            fill
-            className="object-cover h-full w-full transition-opacity duration-500"
-            priority
-            quality={100}
-            onLoad={handleImageLoad}
-            onError={() => {
-              console.error("Failed to load image:", nextImageSrc);
-              setNextImageLoaded(true); // Ensure we don't get stuck
-            }}
-          />
+      {allLoaded.some((loaded) => !loaded) && <LoadingScreen />}
 
-          <video
-            ref={videoRef}
-            className={`absolute inset-0 w-full h-full object-cover ${showingVideo ? "visible" : "invisible"}`}
-            playsInline
-            muted
-            onEnded={handleVideoEnd}
-            onError={(e) => {
-              console.error("Video error:", e);
-              handleVideoEnd(); // Ensure we don't get stuck
-            }}
+      {images.map((image, index) => (
+        <Image
+          key={image}
+          src={image}
+          alt={`Step ${index}`}
+          fill
+          className={`object-cover h-full w-full ${index === currentImageIndex ? "opacity-100" : "opacity-0"}`}
+          priority
+          quality={100}
+          onLoad={() => {
+            setAllLoaded((prev) => {
+              const newLoaded = [...prev];
+              newLoaded[index] = true;
+              return newLoaded;
+            });
+          }}
+          onError={() => {
+            console.error("Failed to load image:", image);
+          }}
+        />
+      ))}
+
+      <video
+        ref={videoRef}
+        className={`absolute inset-0 w-full h-full object-cover ${showingVideo ? "visible" : "invisible"}`}
+        playsInline
+        muted
+        onEnded={() => {
+          setShowingVideo(false);
+          setVideoStarted(false);
+        }}
+        onError={(e) => {
+          console.error("Video error:", e);
+          setShowingVideo(false);
+          setVideoStarted(false);
+        }}
+      >
+        <source src={currentVideoSrc} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
+        <div className="flex justify-between">
+          <button
+            className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
+            onClick={handlePrevious}
+            disabled={currentImageIndex === 0 || showingVideo}
           >
-            <source src={currentVideoSrc} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-
-          <div className="absolute bottom-5 left-5 right-5 p-4 z-10">
-            <div className="flex justify-between">
-              <button
-                className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
-                onClick={handlePrevious}
-                disabled={currentIndex === 0 || showingVideo}
-              >
-                <ArrowLeft className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
-              </button>
-              <button
-                className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
-                onClick={handleNext}
-                disabled={showingVideo}
-              >
-                <ArrowRight className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+            <ArrowLeft className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
+          </button>
+          <button
+            className="bg-primary text-white font-bold p-2 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary group"
+            onClick={handleNext}
+            disabled={showingVideo}
+          >
+            <ArrowRight className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white group-hover:text-primary" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
