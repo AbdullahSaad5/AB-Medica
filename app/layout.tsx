@@ -3,6 +3,8 @@ import { Urbanist } from "next/font/google";
 import "./globals.css";
 import Navbar from "./_components/UIOverlay/Navbar";
 import "./polyfills";
+import "@ungap/with-resolvers";
+import "globalthis/auto";
 
 const urbanist = Urbanist({
   subsets: ["latin"],

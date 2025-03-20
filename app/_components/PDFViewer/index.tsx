@@ -1,6 +1,3 @@
-import "@ungap/with-resolvers";
-import "globalthis/auto";
-
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
