@@ -543,6 +543,11 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
 
+"@ungap/with-resolvers@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@ungap/with-resolvers/-/with-resolvers-0.1.0.tgz#63a07b13bbf10ffff074a36498cce8d82aeeecc4"
+  integrity sha512-g7f0IkJdPW2xhY7H4iE72DAsIyfuwEFc6JWc2tYFwKDMWWAF699vGjrM348cwQuOXgHpe1gWFe+Eiyjx/ewvvw==
+
 "@unrs/rspack-resolver-binding-darwin-arm64@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@unrs/rspack-resolver-binding-darwin-arm64/-/rspack-resolver-binding-darwin-arm64-1.1.2.tgz#90b20c786402cafcea09aeb3587c627edd365995"
