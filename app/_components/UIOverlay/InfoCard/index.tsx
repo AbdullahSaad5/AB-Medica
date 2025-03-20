@@ -2,8 +2,9 @@
 
 import React, { useRef, useState } from "react";
 import VideoPlayer from "../../VideoPlayer";
-import PDFViewer from "../../PDFViewer";
+const PDFViewer = dynamic(() => import("../../PDFViewer"), { ssr: false });
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
+import dynamic from "next/dynamic";
 
 type Button = {
   text: string;

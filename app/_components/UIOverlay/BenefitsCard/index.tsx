@@ -2,7 +2,8 @@
 
 import React, { useRef, useState } from "react";
 import VideoPlayer from "../../VideoPlayer";
-import PDFViewer from "../../PDFViewer";
+import dynamic from "next/dynamic";
+const PDFViewer = dynamic(() => import("../../PDFViewer"), { ssr: false });
 
 type Button = {
   text: string;
