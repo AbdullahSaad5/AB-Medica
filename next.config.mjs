@@ -13,7 +13,7 @@ const nextConfig = {
         protocol: "http",
       },
       {
-        hostname: "ab-medica.vercel.app",
+        hostname: "ab-medica-admin.vercel.app",
         protocol: "https",
       },
     ],
