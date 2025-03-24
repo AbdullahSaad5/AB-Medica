@@ -28,15 +28,17 @@ const Device = ({ isVisible }: { isVisible: boolean }) => {
       {
         name: "SFERA",
         label: "Galleggiante",
-        positionAdjustments: [0.013, 0.01, 0],
+        positionAdjustments: [0, 0, 0],
       },
       {
         name: "VENTOLA_1",
         label: "Girante Della Pompa",
+        positionAdjustments: [0, 0, 0],
       },
       {
         name: "TRASMISSIONE",
         label: "Trascinatore",
+        positionAdjustments: [0, 0, 0],
       },
     ],
   });
