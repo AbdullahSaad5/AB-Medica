@@ -6,6 +6,32 @@ const PDFViewer = dynamic(() => import("../../PDFViewer"), { ssr: false });
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import dynamic from "next/dynamic";
 
+type ComponentsData = {
+  mainData: {
+    title: string;
+    description: string;
+  };
+  overviewDialogsData: {
+    title: string;
+    description: string;
+  }[];
+};
+
+type TechnologiesData = {
+  trailer?: {
+    url: string;
+  };
+  brochure?: {
+    url: string;
+  };
+  presentation?: {
+    url: string;
+  };
+  manual?: {
+    url: string;
+  };
+};
+
 type Button = {
   text: string;
   resourceType: "video" | "pdf";
@@ -16,7 +42,10 @@ const InfoCard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedButton, setSelectedButton] = useState<Button | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { componentsData } = useActiveComponent();
+  const { componentsData, technologiesData } = useActiveComponent() as {
+    componentsData: ComponentsData | null;
+    technologiesData: TechnologiesData;
+  };
 
   const handleVideoEnd = () => {
     if (selectedButton?.resourceType === "video") {
@@ -29,22 +58,22 @@ const InfoCard = () => {
     {
       text: "Teaser",
       resourceType: "video",
-      src: "/assets/videos/TRAILER FINAL V7 16.12_LQ2.mp4",
+      src: technologiesData?.trailer?.url || "",
     },
     {
       text: "Brochure",
       resourceType: "pdf",
-      src: "/assets/pdfs/Brochure Dolphin ITA (1)_compressed.pdf",
+      src: technologiesData?.brochure?.url || "",
     },
     {
       text: "Glossario",
       resourceType: "pdf",
-      src: "/assets/pdfs/AB Medica Mockup brochure_compressed.pdf",
+      src: technologiesData?.presentation?.url || "",
     },
     {
       text: "Manuale d'uso",
       resourceType: "pdf",
-      src: "/assets/pdfs/MU 1 03 01 01 REV.01.pdf",
+      src: technologiesData?.manual?.url || "",
     },
   ];
   return (

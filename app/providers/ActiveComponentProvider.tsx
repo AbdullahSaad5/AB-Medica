@@ -13,8 +13,17 @@ type ActiveComponentContextType = {
   setShowComponentDetails: React.Dispatch<React.SetStateAction<boolean>>;
   componentsData: ComponentsData | null;
   setComponentsData: React.Dispatch<React.SetStateAction<ComponentsData | null>>;
-  loading: boolean;
+  modelsData: Record<string, unknown> | null;
+  setModelsData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
+  technologiesData: Record<string, unknown> | null;
+  setTechnologiesData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
+  setupData: Record<string, unknown> | null;
+  setSetupData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
+  benefitsData: BenefitsData | null;
+  setBenefitsData: React.Dispatch<React.SetStateAction<BenefitsData | null>>;
+  loading: Record<string, boolean>;
 };
+
 type ComponentsData = {
   mainData: {
     title: string;
@@ -26,6 +35,12 @@ type ComponentsData = {
   }[];
 };
 
+type BenefitsData = {
+  videos: { url: string }[];
+  reverseVideos: { url: string }[];
+  stillImages: { url: string }[];
+};
+
 const ActiveComponentContext = React.createContext({} as ActiveComponentContextType);
 
 const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) => {
@@ -35,16 +50,66 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
   const scaleFactor = 0.5 / zoomLevel;
   const maxScale = 1.5;
   const [componentsData, setComponentsData] = React.useState<ComponentsData | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [modelsData, setModelsData] = React.useState<Record<string, unknown> | null>(null);
+  const [technologiesData, setTechnologiesData] = React.useState<Record<string, unknown> | null>(null);
+  const [setupData, setSetupData] = React.useState<Record<string, unknown> | null>(null);
+  const [benefitsData, setBenefitsData] = React.useState<BenefitsData | null>(null);
+  const [loading, setLoading] = React.useState<Record<string, boolean>>({
+    components: true,
+    models: true,
+    technologies: true,
+    setup: true,
+    benefits: true,
+  });
 
-  const { getComponentsData } = useAxios();
+  const { getComponentsData, getModelsData, getTechnologiesData, getSetupData, getBenefitsData } = useAxios();
 
   React.useEffect(() => {
-    getComponentsData().then((data) => {
-      setComponentsData(data);
-      setLoading(false);
-    });
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [componentsResult, modelsResult, technologiesResult, setupResult, benefitsResult] = await Promise.all([
+          getComponentsData(),
+          getModelsData(),
+          getTechnologiesData(),
+          getSetupData(),
+          getBenefitsData(),
+        ]);
+
+        setComponentsData(componentsResult);
+        setModelsData(modelsResult);
+        setTechnologiesData(technologiesResult);
+        setSetupData(setupResult);
+        setBenefitsData(benefitsResult);
+        setLoading({
+          components: false,
+          models: false,
+          technologies: false,
+          setup: false,
+          benefits: false,
+        });
+      } catch (error) {
+        console.log(error);
+        // Handle AbortError from the useAxios hook
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("Data fetching cancelled");
+          return;
+        }
+
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        console.error("Error fetching data:", errorMessage);
+
+        setLoading({
+          components: false,
+          models: false,
+          technologies: false,
+          setup: false,
+          benefits: false,
+        });
+      }
+    };
+
+    fetchData();
+  }, [getComponentsData, getModelsData, getTechnologiesData, getSetupData, getBenefitsData]);
 
   const handleSetActiveComponent = (component: ActiveComponent) => {
     if (activeComponent === component) {
@@ -67,6 +132,14 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
         setShowComponentDetails,
         componentsData,
         setComponentsData,
+        modelsData,
+        setModelsData,
+        technologiesData,
+        setTechnologiesData,
+        setupData,
+        setSetupData,
+        benefitsData,
+        setBenefitsData,
         loading,
       }}
     >

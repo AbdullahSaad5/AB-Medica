@@ -8,6 +8,7 @@ import VideoPlayer from "../_components/VideoPlayer";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "../_components/LoadingScreen";
+import { useActiveComponent } from "../providers/ActiveComponentProvider";
 
 type Hotspot = {
   x: number;
@@ -26,6 +27,9 @@ const Benefits = () => {
   const [isPlayingReverse, setIsPlayingReverse] = useState(false);
   const [isDonePlaying, setIsDonePlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const { benefitsData } = useActiveComponent();
+
+  console.log(benefitsData);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fullscreenVideoRef = useRef<HTMLVideoElement>(null);
@@ -41,57 +45,57 @@ const Benefits = () => {
         x: 49.65,
         y: 31.5,
         color: "white",
-        video: "/assets/videos/benefits/1. cambio asta COMPR.mp4",
+        video: benefitsData?.videos[0]?.url || "",
         displayMode: "modal",
       },
       {
         x: 44.5,
         y: 20,
         color: "white",
-        video: "/assets/videos/benefits/2. No limiti di altezza COMPR.mp4",
+        video: benefitsData?.videos[1]?.url || "",
         displayMode: "modal",
       },
       {
         x: 62.5,
         y: 55.5,
         color: "white",
-        video: "/assets/videos/benefits/3. comandi int AVA COMPR.mp4",
-        reverseVideo: "/assets/videos/benefits/comandi int BACK COMPR.mp4",
+        video: benefitsData?.videos[2]?.url || "",
+        reverseVideo: benefitsData?.reverseVideos[0]?.url || "",
         displayMode: "fullscreen",
-        stillImage: "/assets/images/benefits/comandi still.png",
+        stillImage: benefitsData?.stillImages[0]?.url || "",
       },
       {
         x: 83,
         y: 66.75,
         color: "white",
-        video: "/assets/videos/benefits/4. manipolo AVA COMPR.mp4",
-        reverseVideo: "/assets/videos/benefits/manipolo BACK COMPR.mp4",
+        video: benefitsData?.videos[3]?.url || "",
+        reverseVideo: benefitsData?.reverseVideos[1]?.url || "",
         displayMode: "fullscreen",
-        stillImage: "/assets/images/benefits/manipolo still.png",
+        stillImage: benefitsData?.stillImages[1]?.url || "",
       },
       {
         x: 56.5,
         y: 42.5,
         color: "secondary",
-        video: "/assets/videos/benefits/5. Video 5 velocitA velocizzato 27.11.mp4",
+        video: benefitsData?.videos[4]?.url || "",
         displayMode: "modal",
       },
       {
         x: 37.25,
         y: 60,
         color: "secondary",
-        video: "/assets/videos/benefits/6. POMPA REV TESTO 07 (1).mp4",
+        video: benefitsData?.videos[5]?.url || "",
         displayMode: "modal",
       },
       {
         x: 51,
         y: 69.75,
         color: "secondary",
-        video: "/assets/videos/benefits/7. cannule COMPR.mp4",
+        video: benefitsData?.videos[6]?.url || "",
         displayMode: "modal",
       },
     ],
-    []
+    [benefitsData]
   );
 
   // Preload assets

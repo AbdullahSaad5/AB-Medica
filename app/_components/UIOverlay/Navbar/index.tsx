@@ -33,7 +33,7 @@ const Navbar = () => {
       <div className="flex justify-between items-stretch h-full">
         <div className="h-full relative w-36 md:w-44 lg:w-56">
           <Link href="/">
-            <Image src="/logo-ab-medica.png" alt="Logo" className="h-8 object-contain" fill />
+            <Image src="/logo-ab-medica.png" alt="Logo" className="h-8 object-contain" fill priority />
           </Link>
         </div>
         <div className="h-full flex items-center space-x-2 sm:space-x-6 lg:space-x-8 text-lg">

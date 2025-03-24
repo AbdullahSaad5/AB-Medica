@@ -15,11 +15,13 @@ const Scene = () => {
   const controlsRef = useRef(null);
   const groupRef = useRef<THREE.Group | null>(null);
   const { camera } = useThree();
-  const { activeComponent, setZoomLevel } = useActiveComponent();
+  const { activeComponent, setZoomLevel, modelsData } = useActiveComponent();
   const [isInitialized, setIsInitialized] = useState(false);
   const lastDistanceRef = useRef<number | null>(null);
   const lastTargetRef = useRef<THREE.Vector3 | null>(null);
   const forceUpdateRef = useRef(false);
+
+  console.log(modelsData);
 
   // Define specific camera views for each component
   const cameraViews = useMemo(

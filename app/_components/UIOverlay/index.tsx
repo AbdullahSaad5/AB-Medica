@@ -7,9 +7,11 @@ import LoadingScreen from "../LoadingScreen";
 
 const UIOverlay = () => {
   const { activeComponent, handleSetActiveComponent, showComponentDetails, loading } = useActiveComponent();
+
+  const anyLoading = Object.values(loading).some((value) => value);
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 p-4 z-10 pointer-events-none">
-      {loading ? (
+      {anyLoading ? (
         <LoadingScreen />
       ) : !activeComponent ? (
         <InfoCard />
