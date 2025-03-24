@@ -6,6 +6,14 @@ const nextConfig = {
     return config;
   },
   swcMinify: true,
+  images: {
+    remotePatterns: [
+      {
+        hostname: "localhost",
+        protocol: "http",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
