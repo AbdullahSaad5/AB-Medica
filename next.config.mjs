@@ -12,6 +12,10 @@ const nextConfig = {
         hostname: "localhost",
         protocol: "http",
       },
+      {
+        hostname: "ab-medica.vercel.app",
+        protocol: "https",
+      },
     ],
   },
 };
