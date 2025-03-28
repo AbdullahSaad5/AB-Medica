@@ -3,6 +3,15 @@ import useAxios from "../hooks/useAxios";
 
 export type ActiveComponent = "stand" | "nozel" | "machine" | "device" | null;
 
+type ModelsData = {
+  mediaData: {
+    stand: { url: string };
+    nozel: { url: string };
+    machine: { url: string };
+    device: { url: string };
+  };
+};
+
 type ActiveComponentContextType = {
   activeComponent: ActiveComponent;
   handleSetActiveComponent: (component: ActiveComponent) => void;
@@ -13,8 +22,8 @@ type ActiveComponentContextType = {
   setShowComponentDetails: React.Dispatch<React.SetStateAction<boolean>>;
   componentsData: ComponentsData | null;
   setComponentsData: React.Dispatch<React.SetStateAction<ComponentsData | null>>;
-  modelsData: Record<string, unknown> | null;
-  setModelsData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
+  modelsData: ModelsData | null;
+  setModelsData: React.Dispatch<React.SetStateAction<ModelsData | null>>;
   technologiesData: Record<string, unknown> | null;
   setTechnologiesData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
   setupData: Record<string, unknown> | null;
@@ -50,7 +59,7 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
   const scaleFactor = 0.5 / zoomLevel;
   const maxScale = 1.5;
   const [componentsData, setComponentsData] = React.useState<ComponentsData | null>(null);
-  const [modelsData, setModelsData] = React.useState<Record<string, unknown> | null>(null);
+  const [modelsData, setModelsData] = React.useState<ModelsData | null>(null);
   const [technologiesData, setTechnologiesData] = React.useState<Record<string, unknown> | null>(null);
   const [setupData, setSetupData] = React.useState<Record<string, unknown> | null>(null);
   const [benefitsData, setBenefitsData] = React.useState<BenefitsData | null>(null);
@@ -76,7 +85,7 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
         ]);
 
         setComponentsData(componentsResult);
-        setModelsData(modelsResult);
+        setModelsData(modelsResult as unknown as ModelsData);
         setTechnologiesData(technologiesResult);
         setSetupData(setupResult);
         setBenefitsData(benefitsResult);

@@ -10,15 +10,13 @@ import LabelHostpot from "../Hotspots/LabelHospot";
 
 const MODEL_PATH = "/models/corpo-dolphin.glb";
 
-const Machine = ({ isVisible }: { isVisible: boolean }) => {
+const Machine = ({ isVisible, path }: { isVisible: boolean; path: string }) => {
   const modelRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
   const { handleSetActiveComponent, activeComponent } = useActiveComponent();
   const isActive = activeComponent === "machine";
 
-  const result = useGLTF(MODEL_PATH, undefined, undefined, (error) => {
-    console.error("Error loading machine model:", error);
-  });
+  const result = useGLTF(path);
 
   const { mixer, isAnimationPlaying } = useAnimationMixer({
     modelRef,

@@ -15,13 +15,11 @@ const Scene = () => {
   const controlsRef = useRef(null);
   const groupRef = useRef<THREE.Group | null>(null);
   const { camera } = useThree();
-  const { activeComponent, setZoomLevel, modelsData } = useActiveComponent();
+  const { activeComponent, setZoomLevel, modelsData, loading } = useActiveComponent();
   const [isInitialized, setIsInitialized] = useState(false);
   const lastDistanceRef = useRef<number | null>(null);
   const lastTargetRef = useRef<THREE.Vector3 | null>(null);
   const forceUpdateRef = useRef(false);
-
-  console.log(modelsData);
 
   // Define specific camera views for each component
   const cameraViews = useMemo(
@@ -160,6 +158,13 @@ const Scene = () => {
     camera.updateProjectionMatrix();
   }, [activeComponent, camera, cameraViews]);
 
+  const anyLoading = Object.values(loading).some((value) => value);
+
+  if (anyLoading || !modelsData) {
+    // return <div>Loading...</div>;
+    return <color attach="background" args={["#31a2d6"]} />;
+  }
+
   return (
     <>
       <PerspectiveCamera makeDefault fov={50} />
@@ -167,10 +172,16 @@ const Scene = () => {
       <color attach="background" args={["#31a2d6"]} />
 
       <group ref={groupRef}>
-        <Stand isVisible={!activeComponent || activeComponent === "stand"} />
-        <Nozel isVisible={!activeComponent || activeComponent === "nozel"} />
-        <Machine isVisible={!activeComponent || activeComponent === "machine"} />
-        <Device isVisible={!activeComponent || activeComponent === "device"} />
+        <Stand isVisible={!activeComponent || activeComponent === "stand"} path={modelsData?.mediaData?.stand?.url} />
+        <Nozel isVisible={!activeComponent || activeComponent === "nozel"} path={modelsData?.mediaData?.nozel?.url} />
+        <Machine
+          isVisible={!activeComponent || activeComponent === "machine"}
+          path={modelsData?.mediaData?.machine?.url}
+        />
+        <Device
+          isVisible={!activeComponent || activeComponent === "device"}
+          path={modelsData?.mediaData?.device?.url}
+        />
       </group>
 
       <OrbitControls

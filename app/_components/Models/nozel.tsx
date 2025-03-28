@@ -10,12 +10,12 @@ import LabelHostpot from "../Hotspots/LabelHospot";
 
 const MODEL_PATH = "/models/dolphin-manipolo-1.glb";
 
-const Nozel = ({ isVisible }: { isVisible: boolean }) => {
-  const result = useGLTF(MODEL_PATH);
+const Nozel = ({ isVisible, path }: { isVisible: boolean; path: string }) => {
   const groupRef = useRef<Group>(null);
   const modelRef = useRef<Group>(null);
   const { handleSetActiveComponent, activeComponent } = useActiveComponent();
   const isActive = activeComponent === "nozel";
+  const result = useGLTF(path);
 
   const { mixer, isAnimationPlaying } = useAnimationMixer({
     modelRef,
@@ -30,7 +30,6 @@ const Nozel = ({ isVisible }: { isVisible: boolean }) => {
         name: "FERMO_SCOCCA",
         label: "Innesto Cannula Con Anello Di Espansione",
       },
-
       {
         name: "COMPONENTI_INTERNI003",
         label: "Valvole a cassetto",
@@ -40,10 +39,7 @@ const Nozel = ({ isVisible }: { isVisible: boolean }) => {
         label: "Tasti di azionamento",
         positionAdjustments: [-0.01, -0.015, 0],
       },
-      // {
-      //   name: "CANULA_2001",
-      //   label: "Canula 2001",
-      // },
+
       {
         name: "CANULA_2002",
         label: "Cannula",

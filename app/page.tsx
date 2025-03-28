@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import Scene from "./_components/Scene";
 import UIOverlay from "./_components/UIOverlay";
 import LoadingScreen from "./_components/LoadingScreen";
-// import Test from "./test";
 
 export default function Home() {
   return (
@@ -25,7 +24,6 @@ export default function Home() {
         >
           <Scene />
         </Canvas>
-        {/* <Test /> */}
       </Suspense>
     </div>
   );
