@@ -3,7 +3,10 @@ import { useEffect } from "react";
 const Test = () => {
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("http://localhost:3000/api/media/file/presentazione_VRtualize.pdf");
+      const URL = process.env.NEXT_PUBLIC_API_URL + "/media/file/presentazione_VRtualize.pdf?random=" + Math.random();
+      const response = await fetch(URL, {
+        // mode: "no-cors",
+      });
       const data = await response.json();
       console.log(data);
     };

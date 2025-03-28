@@ -63,20 +63,20 @@ const InfoCard = () => {
     {
       text: "Brochure",
       resourceType: "pdf",
-      // src: technologiesData?.brochure?.url || "",
-      src: "/assets/pdfs/Brochure Dolphin ITA (1)_compressed.pdf",
+      src: technologiesData?.brochure?.url || "",
+      // src: "/assets/pdfs/Brochure Dolphin ITA (1)_compressed.pdf",
     },
     {
       text: "Glossario",
       resourceType: "pdf",
-      // src: technologiesData?.presentation?.url || "",
-      src: "/assets/pdfs/AB Medica Mockup brochure_compressed.pdf",
+      src: technologiesData?.presentation?.url || "",
+      // src: "/assets/pdfs/AB Medica Mockup brochure_compressed.pdf",
     },
     {
       text: "Manuale d'uso",
       resourceType: "pdf",
-      // src: technologiesData?.manual?.url || "",
-      src: "/assets/pdfs/MU 1 03 01 01 REV.01.pdf",
+      src: technologiesData?.manual?.url || "",
+      // src: "/assets/pdfs/MU 1 03 01 01 REV.01.pdf",
     },
   ];
   return (

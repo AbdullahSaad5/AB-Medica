@@ -64,7 +64,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdfUrl, handleCloseModal }) => {
             file={pdfUrl}
             onLoadSuccess={onDocumentLoadSuccess}
             className="flex flex-col items-center"
-            loading={null}
             error={
               <div className="w-full h-full flex items-center justify-center">
                 <p className="text-red-500 text-lg">Error loading PDF. Please try again later.</p>
