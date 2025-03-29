@@ -110,21 +110,11 @@ export const useAxios = () => {
 
       const config = JSON.parse(responseData.config) as TechnologiesConfig;
 
-      const assetsIds = config.assetsIds;
       const productDialogData = config.productDialogData;
 
       const mediaController = createAbortController("getTechnologiesMediaData");
-      const assetPromises = Object.entries(assetsIds).map(async ([assetName, assetId]) => {
-        const response = await instance.get<MediaResponse>(`/media/${assetId}`, {
-          signal: mediaController.signal,
-        });
-        return {
-          assetName,
-          media: response.data,
-        };
-      });
 
-      const assetPromises2 = productDialogData.map(async (productDialog) => {
+      const assetPromises = productDialogData.map(async (productDialog) => {
         const response = await instance.get<MediaResponse>(`/media/${productDialog.assetId}`, {
           signal: mediaController.signal,
         });
@@ -132,20 +122,14 @@ export const useAxios = () => {
       });
 
       const assetResults = await Promise.all(assetPromises);
-      const assetResults2 = await Promise.all(assetPromises2);
-
-      const assetMap = assetResults.reduce<Record<string, MediaResponse>>((acc, curr) => {
-        acc[curr.assetName] = curr.media;
-        return acc;
-      }, {});
 
       // Replace ids with media data
-      const productDialogData2 = productDialogData.map((productDialog, index) => ({
+      const productDialogDataWithMedia = productDialogData.map((productDialog, index) => ({
         ...productDialog,
-        media: assetResults2[index],
+        media: assetResults[index],
       }));
 
-      return { assetMap, productDialogData: productDialogData2 };
+      return { productDialogData: productDialogDataWithMedia };
     } finally {
       delete abortControllersRef.current["getTechnologiesData"];
       delete abortControllersRef.current["getTechnologiesMediaData"];

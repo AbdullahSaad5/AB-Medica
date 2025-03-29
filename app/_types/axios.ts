@@ -19,15 +19,12 @@ export interface MediaResponse extends Media {
 }
 
 export interface ProductDialog {
-  buttonText: string;
   assetId: string;
   media?: MediaResponse;
-  title: string;
-  description: string;
+  buttonText: string;
 }
 
 export interface TechnologiesConfig {
-  assetsIds: Record<string, string>;
   productDialogData: ProductDialog[];
 }
 
@@ -56,6 +53,5 @@ export interface BenefitsData {
 }
 
 export interface TechnologiesData {
-  assetMap: Record<string, MediaResponse>;
   productDialogData: ProductDialog[];
 }
