@@ -54,31 +54,15 @@ const InfoCard = () => {
     }
   };
 
-  const buttons: Button[] = [
-    {
-      text: "Teaser",
-      resourceType: "video",
-      src: technologiesData?.trailer?.url || "",
-    },
-    {
-      text: "Brochure",
-      resourceType: "pdf",
-      src: technologiesData?.brochure?.url || "",
-      // src: "/assets/pdfs/Brochure Dolphin ITA (1)_compressed.pdf",
-    },
-    {
-      text: "Glossario",
-      resourceType: "pdf",
-      src: technologiesData?.presentation?.url || "",
-      // src: "/assets/pdfs/AB Medica Mockup brochure_compressed.pdf",
-    },
-    {
-      text: "Manuale d'uso",
-      resourceType: "pdf",
-      src: technologiesData?.manual?.url || "",
-      // src: "/assets/pdfs/MU 1 03 01 01 REV.01.pdf",
-    },
-  ];
+  const buttons: Button[] =
+    technologiesData?.productDialogData?.map((productDialog: any) => {
+      return {
+        text: productDialog.buttonText,
+        resourceType: productDialog.media.mimeType.includes("video") ? "video" : "pdf",
+        src: productDialog.media.url,
+      };
+    }) || [];
+
   return (
     <div className="mt-[calc(10vh+2rem)] flex w-full justify-end z-10">
       <div className="w-[50vw] lg:w-[35vw] bg-white/75  rounded-3xl shadow-lg py-[3vh] px-[2.2vw] space-y-1  lg:space-y-3  pointer-events-auto">
