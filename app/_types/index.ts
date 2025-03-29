@@ -1,3 +1,5 @@
+export type ActiveComponent = "stand" | "nozel" | "machine" | "device" | null;
+
 export type Media = {
   product: string;
   section: string;
@@ -38,18 +40,15 @@ export type AssetsIds = {
 export type ProductDialogData = {
   buttonText: string;
   assetId: string;
+  media?: Media;
 };
 
 export type ModelsData = {
   productConfigIds: ProductConfigIds;
-  assetsIds: AssetsIds;
-  productDialogData: ProductDialogData[];
+  mediaData: Record<string, Media>;
 };
 
-export type ButtonData = {
-  buttonText: string;
-  assetId: string;
-};
+export type ButtonData = ProductDialogData;
 
 export type SetupData = {
   images: string[];

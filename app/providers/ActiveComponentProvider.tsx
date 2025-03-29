@@ -1,16 +1,15 @@
 import React from "react";
 import useAxios from "../hooks/useAxios";
+import { ComponentsData, ModelsData, ActiveComponent } from "../_types";
+import { TechnologiesData, SetupData, BenefitsData } from "../_types/axios";
 
-export type ActiveComponent = "stand" | "nozel" | "machine" | "device" | null;
-
-type ModelsData = {
-  mediaData: {
-    stand: { url: string };
-    nozel: { url: string };
-    machine: { url: string };
-    device: { url: string };
-  };
-};
+interface LoadingState {
+  components: boolean;
+  models: boolean;
+  technologies: boolean;
+  setup: boolean;
+  benefits: boolean;
+}
 
 type ActiveComponentContextType = {
   activeComponent: ActiveComponent;
@@ -24,33 +23,16 @@ type ActiveComponentContextType = {
   setComponentsData: React.Dispatch<React.SetStateAction<ComponentsData | null>>;
   modelsData: ModelsData | null;
   setModelsData: React.Dispatch<React.SetStateAction<ModelsData | null>>;
-  technologiesData: Record<string, unknown> | null;
-  setTechnologiesData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
-  setupData: Record<string, unknown> | null;
-  setSetupData: React.Dispatch<React.SetStateAction<Record<string, unknown> | null>>;
+  technologiesData: TechnologiesData | null;
+  setTechnologiesData: React.Dispatch<React.SetStateAction<TechnologiesData | null>>;
+  setupData: SetupData | null;
+  setSetupData: React.Dispatch<React.SetStateAction<SetupData | null>>;
   benefitsData: BenefitsData | null;
   setBenefitsData: React.Dispatch<React.SetStateAction<BenefitsData | null>>;
-  loading: Record<string, boolean>;
+  loading: LoadingState;
 };
 
-type ComponentsData = {
-  mainData: {
-    title: string;
-    description: string;
-  };
-  overviewDialogsData: {
-    title: string;
-    description: string;
-  }[];
-};
-
-type BenefitsData = {
-  videos: { url: string }[];
-  reverseVideos: { url: string }[];
-  stillImages: { url: string }[];
-};
-
-const ActiveComponentContext = React.createContext({} as ActiveComponentContextType);
+const ActiveComponentContext = React.createContext<ActiveComponentContextType | undefined>(undefined);
 
 const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeComponent, setActiveComponent] = React.useState<ActiveComponent>(null);
@@ -60,10 +42,10 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
   const maxScale = 1.5;
   const [componentsData, setComponentsData] = React.useState<ComponentsData | null>(null);
   const [modelsData, setModelsData] = React.useState<ModelsData | null>(null);
-  const [technologiesData, setTechnologiesData] = React.useState<Record<string, unknown> | null>(null);
-  const [setupData, setSetupData] = React.useState<Record<string, unknown> | null>(null);
+  const [technologiesData, setTechnologiesData] = React.useState<TechnologiesData | null>(null);
+  const [setupData, setSetupData] = React.useState<SetupData | null>(null);
   const [benefitsData, setBenefitsData] = React.useState<BenefitsData | null>(null);
-  const [loading, setLoading] = React.useState<Record<string, boolean>>({
+  const [loading, setLoading] = React.useState<LoadingState>({
     components: true,
     models: true,
     technologies: true,
@@ -85,7 +67,7 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
         ]);
 
         setComponentsData(componentsResult);
-        setModelsData(modelsResult as unknown as ModelsData);
+        setModelsData(modelsResult);
         setTechnologiesData(technologiesResult);
         setSetupData(setupResult);
         setBenefitsData(benefitsResult);
@@ -129,35 +111,31 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-  return (
-    <ActiveComponentContext.Provider
-      value={{
-        activeComponent,
-        handleSetActiveComponent,
-        zoomLevel,
-        setZoomLevel,
-        scaleFactor: scaleFactor > maxScale ? maxScale : scaleFactor,
-        showComponentDetails,
-        setShowComponentDetails,
-        componentsData,
-        setComponentsData,
-        modelsData,
-        setModelsData,
-        technologiesData,
-        setTechnologiesData,
-        setupData,
-        setSetupData,
-        benefitsData,
-        setBenefitsData,
-        loading,
-      }}
-    >
-      {children}
-    </ActiveComponentContext.Provider>
-  );
+  const value: ActiveComponentContextType = {
+    activeComponent,
+    handleSetActiveComponent,
+    zoomLevel,
+    setZoomLevel,
+    scaleFactor: scaleFactor > maxScale ? maxScale : scaleFactor,
+    showComponentDetails,
+    setShowComponentDetails,
+    componentsData,
+    setComponentsData,
+    modelsData,
+    setModelsData,
+    technologiesData,
+    setTechnologiesData,
+    setupData,
+    setSetupData,
+    benefitsData,
+    setBenefitsData,
+    loading,
+  };
+
+  return <ActiveComponentContext.Provider value={value}>{children}</ActiveComponentContext.Provider>;
 };
 
-export const useActiveComponent = () => {
+export const useActiveComponent = (): ActiveComponentContextType => {
   const context = React.useContext(ActiveComponentContext);
   if (!context) {
     throw new Error("useActiveComponent must be used within an ActiveComponentProvider");

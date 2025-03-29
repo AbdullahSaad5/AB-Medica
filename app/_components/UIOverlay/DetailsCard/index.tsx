@@ -1,6 +1,7 @@
 "use client";
 
-import { ActiveComponent, useActiveComponent } from "@/app/providers/ActiveComponentProvider";
+import { ActiveComponent } from "@/app/_types";
+import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 
 type Content = {
   title: string;

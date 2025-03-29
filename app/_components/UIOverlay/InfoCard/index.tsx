@@ -4,48 +4,20 @@ import React, { useRef, useState } from "react";
 import VideoPlayer from "../../VideoPlayer";
 const PDFViewer = dynamic(() => import("../../PDFViewer"), { ssr: false });
 import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
+import { ProductDialog } from "@/app/_types/axios";
 import dynamic from "next/dynamic";
 
-type ComponentsData = {
-  mainData: {
-    title: string;
-    description: string;
-  };
-  overviewDialogsData: {
-    title: string;
-    description: string;
-  }[];
-};
-
-type TechnologiesData = {
-  trailer?: {
-    url: string;
-  };
-  brochure?: {
-    url: string;
-  };
-  presentation?: {
-    url: string;
-  };
-  manual?: {
-    url: string;
-  };
-};
-
-type Button = {
+interface Button {
   text: string;
   resourceType: "video" | "pdf";
   src: string;
-};
+}
 
 const InfoCard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedButton, setSelectedButton] = useState<Button | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { componentsData, technologiesData } = useActiveComponent() as {
-    componentsData: ComponentsData | null;
-    technologiesData: TechnologiesData;
-  };
+  const { componentsData, technologiesData } = useActiveComponent();
 
   const handleVideoEnd = () => {
     if (selectedButton?.resourceType === "video") {
@@ -54,14 +26,15 @@ const InfoCard = () => {
     }
   };
 
-  const buttons: Button[] =
-    technologiesData?.productDialogData?.map((productDialog: any) => {
-      return {
-        text: productDialog.buttonText,
-        resourceType: productDialog.media.mimeType.includes("video") ? "video" : "pdf",
-        src: productDialog.media.url,
-      };
-    }) || [];
+  const buttons: Button[] = React.useMemo(() => {
+    if (!technologiesData?.productDialogData) return [];
+
+    return technologiesData.productDialogData.map((productDialog: ProductDialog) => ({
+      text: productDialog.buttonText,
+      resourceType: productDialog.media?.mimeType.includes("video") ? "video" : "pdf",
+      src: productDialog.media?.url || "",
+    }));
+  }, [technologiesData?.productDialogData]);
 
   return (
     <div className="mt-[calc(10vh+2rem)] flex w-full justify-end z-10">
@@ -91,17 +64,13 @@ const InfoCard = () => {
       {modalOpen && selectedButton && selectedButton.resourceType === "video" && (
         <VideoPlayer
           videoRef={videoRef}
-          videoSrc={selectedButton?.src as string}
+          videoSrc={selectedButton.src}
           handleCloseModal={() => setModalOpen(false)}
           handleVideoEnd={handleVideoEnd}
         />
       )}
       {modalOpen && selectedButton && selectedButton.resourceType === "pdf" && (
-        <PDFViewer
-          // pdfUrl={"https://cdn.filestackcontent.com/wcrjf9qPTCKXV3hMXDwK"}
-          pdfUrl={selectedButton?.src as string}
-          handleCloseModal={() => setModalOpen(false)}
-        />
+        <PDFViewer pdfUrl={selectedButton.src} handleCloseModal={() => setModalOpen(false)} />
       )}
     </div>
   );
