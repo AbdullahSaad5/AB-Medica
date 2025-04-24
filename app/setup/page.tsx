@@ -1,6 +1,6 @@
 "use client";
 
-import LoadingScreen from "../_components/LoadingScreen";
+import LoadingSpinner from "../_components/LoadingSpinner";
 import { useActiveComponent } from "../providers/ActiveComponentProvider";
 import DeviceSetup from "./setup";
 
@@ -9,7 +9,7 @@ const Setup = () => {
 
   const anyLoading = Object.values(loading).some((value) => value);
 
-  return anyLoading ? <LoadingScreen /> : <DeviceSetup />;
+  return anyLoading ? <LoadingSpinner /> : <DeviceSetup />;
 };
 
 export default Setup;

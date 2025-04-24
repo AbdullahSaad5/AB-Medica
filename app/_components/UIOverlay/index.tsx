@@ -4,6 +4,7 @@ import { useActiveComponent } from "@/app/providers/ActiveComponentProvider";
 import { ArrowLeft } from "lucide-react";
 import DetailsCard from "./DetailsCard";
 import LoadingScreen from "../LoadingScreen";
+import LoadingSpinner from "../LoadingSpinner";
 
 const UIOverlay = () => {
   const { activeComponent, handleSetActiveComponent, showComponentDetails, loading } = useActiveComponent();
@@ -12,7 +13,9 @@ const UIOverlay = () => {
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 p-4 z-10 pointer-events-none">
       {anyLoading ? (
-        <LoadingScreen />
+        <LoadingSpinner>
+          <LoadingScreen />
+        </LoadingSpinner>
       ) : !activeComponent ? (
         <InfoCard />
       ) : activeComponent && showComponentDetails ? (

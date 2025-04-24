@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import LoadingScreen from "../_components/LoadingScreen";
+import LoadingSpinner from "../_components/LoadingSpinner";
 
 const images = [
   "/assets/images/Vista iniziale-1.png",
@@ -134,7 +134,7 @@ const Setup = () => {
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {allLoaded.some((loaded) => !loaded) && <LoadingScreen />}
+      {allLoaded.some((loaded) => !loaded) && <LoadingSpinner />}
 
       {/* Render all images at once with opacity control */}
       {images.map((image, index) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import LoadingScreen from "../_components/LoadingScreen";
+import LoadingSpinner from "../_components/LoadingSpinner";
 import { useActiveComponent } from "../providers/ActiveComponentProvider";
 import Benefits from "./benefits";
 
@@ -11,7 +11,7 @@ const BenefitsPage = () => {
 
   console.log("loading", anyLoading);
 
-  return anyLoading ? <LoadingScreen /> : <Benefits />;
+  return anyLoading ? <LoadingSpinner /> : <Benefits />;
 };
 
 export default BenefitsPage;

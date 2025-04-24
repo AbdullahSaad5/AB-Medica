@@ -7,8 +7,8 @@ import NumberHotspot from "../_components/Hotspots/NumberHotspot";
 import VideoPlayer from "../_components/VideoPlayer";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import LoadingScreen from "../_components/LoadingScreen";
 import { useActiveComponent } from "../providers/ActiveComponentProvider";
+import LoadingSpinner from "../_components/LoadingSpinner";
 
 type Hotspot = {
   x: number;
@@ -227,7 +227,7 @@ const Benefits = () => {
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
       {isLoading ? (
-        <LoadingScreen />
+        <LoadingSpinner />
       ) : (
         <>
           {/* Base background image */}

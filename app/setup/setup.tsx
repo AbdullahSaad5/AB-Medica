@@ -4,8 +4,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import LoadingScreen from "../_components/LoadingScreen";
 import { useActiveComponent } from "../providers/ActiveComponentProvider";
+import LoadingSpinner from "../_components/LoadingSpinner";
 
 // const images = [
 //   "/assets/images/Vista iniziale-1.png",
@@ -115,7 +115,7 @@ const DeviceSetup = () => {
 
   // Early return if setupData is not available
   if (!typedSetupData?.images || !typedSetupData?.forwardVideos || !typedSetupData?.backwardVideos) {
-    return <LoadingScreen />;
+    return <LoadingSpinner />;
   }
 
   const { images, forwardVideos, backwardVideos } = typedSetupData;
@@ -147,12 +147,12 @@ const DeviceSetup = () => {
     direction === "forward" ? forwardVideos[currentVideoIndex]?.url : backwardVideos[currentVideoIndex]?.url;
 
   if (!currentVideoSrc) {
-    return <LoadingScreen />;
+    return <LoadingSpinner />;
   }
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {allLoaded.some((loaded) => !loaded) && <LoadingScreen />}
+      {allLoaded.some((loaded) => !loaded) && <LoadingSpinner />}
 
       {images.map((image, index) => (
         <Image
