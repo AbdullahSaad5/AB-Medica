@@ -5,19 +5,11 @@ import { Suspense } from "react";
 import Scene from "./_components/Scene";
 import UIOverlay from "./_components/UIOverlay";
 import LoadingScreen from "./_components/LoadingScreen";
-import LoadingSpinner from "./_components/LoadingSpinner";
 
 export default function Home() {
   return (
     <div className="h-screen bg-white relative">
-      <Suspense
-        fallback={
-          <LoadingSpinner>
-            <LoadingScreen />
-          </LoadingSpinner>
-        }
-        unstable_expectedLoadTime={3000}
-      >
+      <Suspense fallback={<LoadingScreen />} unstable_expectedLoadTime={3000}>
         <UIOverlay />
 
         <Canvas
