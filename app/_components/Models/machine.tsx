@@ -8,6 +8,8 @@ import type { Group } from "three";
 import ClickableHotSpot from "../Hotspots/ButtonHotspot";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
+const MODEL_PATH = "/models/corpo-dolphin.glb";
+
 const Machine = ({ isVisible, path }: { isVisible: boolean; path: string }) => {
   const modelRef = useRef<Group>(null);
   const groupRef = useRef<Group>(null);
@@ -77,5 +79,8 @@ const Machine = ({ isVisible, path }: { isVisible: boolean; path: string }) => {
     </group>
   ) : null;
 };
+
+// Preload the model
+useGLTF.preload(MODEL_PATH);
 
 export default Machine;

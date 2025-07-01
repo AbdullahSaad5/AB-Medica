@@ -8,7 +8,7 @@ import { useHotspotPositions } from "@/app/hooks/useHotspotPositions";
 import { useFrame } from "@react-three/fiber";
 import LabelHostpot from "../Hotspots/LabelHospot";
 
-
+const MODEL_PATH = "/models/dolphin-manipolo-1.glb";
 
 const Nozel = ({ isVisible, path }: { isVisible: boolean; path: string }) => {
   const groupRef = useRef<Group>(null);
@@ -81,3 +81,5 @@ const Nozel = ({ isVisible, path }: { isVisible: boolean; path: string }) => {
 
 export default Nozel;
 
+// Preload model
+useGLTF.preload(MODEL_PATH);
