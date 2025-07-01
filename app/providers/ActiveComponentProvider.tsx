@@ -1,4 +1,5 @@
 import React from "react";
+import { useGLTF } from "@react-three/drei";
 import useAxios from "../hooks/useAxios";
 import { ComponentsData, ModelsData, ActiveComponent } from "../_types";
 import { TechnologiesData, SetupData, BenefitsData } from "../_types/axios";
@@ -101,6 +102,20 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
 
     fetchData();
   }, [getComponentsData, getModelsData, getTechnologiesData, getSetupData, getBenefitsData]);
+
+  // Preload all model URLs when modelsData is available
+  React.useEffect(() => {
+    if (modelsData && modelsData.mediaData) {
+      const modelUrls = Object.values(modelsData.mediaData)
+        .filter((media): media is NonNullable<typeof media> => media != null && media.url != null)
+        .map((media) => media.url);
+
+      // Preload all model URLs
+      modelUrls.forEach((url) => {
+        useGLTF.preload(url);
+      });
+    }
+  }, [modelsData]);
 
   const handleSetActiveComponent = (component: ActiveComponent) => {
     if (activeComponent === component) {
