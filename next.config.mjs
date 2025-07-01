@@ -16,6 +16,10 @@ const nextConfig = {
         hostname: "ab-medica-admin.vercel.app",
         protocol: "https",
       },
+      {
+        hostname: "coral-app-tis6o.ondigitalocean.app",
+        protocol: "https",
+      },
     ],
   },
 };
