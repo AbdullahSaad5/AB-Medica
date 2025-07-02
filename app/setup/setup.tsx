@@ -7,40 +7,6 @@ import { useEffect, useRef, useState } from "react";
 import { useActiveComponent } from "../providers/ActiveComponentProvider";
 import LoadingSpinner from "../_components/LoadingSpinner";
 
-// const images = [
-//   "/assets/images/Vista iniziale-1.png",
-//   "/assets/images/Step 0 FRAME.png",
-//   "/assets/images/Step 1 FRAME.png",
-//   "/assets/images/Step 2 FRAME.png",
-//   "/assets/images/Step 3 FRAME.png",
-//   "/assets/images/Step 4 FRAME.png",
-//   "/assets/images/Step 5 FRAME.png",
-//   "/assets/images/Step 6 FRAME.png",
-//   "/assets/images/Step 7 FRAME.png",
-// ];
-
-// const forwardVideos = [
-//   "/assets/videos/forwards/s0 avanti compr.mp4",
-//   "/assets/videos/forwards/s1 avanti compr.mp4",
-//   "/assets/videos/forwards/s2 avanti compr.mp4",
-//   "/assets/videos/forwards/s3 avanti compr.mp4",
-//   "/assets/videos/forwards/s4 avanti compr.mp4",
-//   "/assets/videos/forwards/s5 avanti compr.mp4",
-//   "/assets/videos/forwards/s6 avanti compr.mp4",
-//   "/assets/videos/forwards/s7 avanti compr.mp4",
-// ];
-
-// const backwardVideos = [
-//   "/assets/videos/backwards/s0 back compr.mp4",
-//   "/assets/videos/backwards/s1 back compr.mp4",
-//   "/assets/videos/backwards/s2 back compr.mp4",
-//   "/assets/videos/backwards/s3 back compr.mp4",
-//   "/assets/videos/backwards/s4 back compr.mp4",
-//   "/assets/videos/backwards/s5 back compr.mp4",
-//   "/assets/videos/backwards/s6 back compr.mp4",
-//   "/assets/videos/backwards/s7 back compr.mp4",
-// ];
-
 interface SetupImage {
   url: string;
 }
@@ -65,12 +31,38 @@ const DeviceSetup = () => {
   const { setupData } = useActiveComponent();
   const typedSetupData = setupData as unknown as SetupData | undefined;
   const router = useRouter();
-  const [allLoaded, setAllLoaded] = useState<boolean[]>([]);
+  // Track whether every setup image is now cached by the browser. When this is
+  // true we know subsequent "next/previous" navigations will not trigger extra
+  // network requests for the same files.
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
 
+  // Pre-cache every image on the first render. We rely on the browser cache,
+  // therefore each file is fetched only once and is served from memory on the
+  // following renders.
   useEffect(() => {
-    if (typedSetupData?.images) {
-      setAllLoaded(Array(typedSetupData.images.length).fill(false));
-    }
+    if (!typedSetupData?.images?.length) return;
+
+    let cancelled = false;
+
+    const preload = async () => {
+      const promises = typedSetupData.images.map(({ url }) => {
+        return new Promise<void>((resolve) => {
+          const img = new window.Image();
+          img.src = url;
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // still resolve on error to avoid lock
+        });
+      });
+
+      await Promise.all(promises);
+      if (!cancelled) setImagesPreloaded(true);
+    };
+
+    preload();
+
+    return () => {
+      cancelled = true;
+    };
   }, [typedSetupData?.images]);
 
   // Handle video playback events
@@ -152,27 +144,22 @@ const DeviceSetup = () => {
 
   return (
     <div className="min-h-screen bg-white relative w-full h-screen">
-      {allLoaded.some((loaded) => !loaded) && <LoadingSpinner />}
+      {!imagesPreloaded && <LoadingSpinner />}
 
+      {/* All images stay in the DOM so that React never re-mounts/re-fetches
+          them. The CSS opacity toggle merely shows/hides the correct one. */}
       {images.map((image, index) => (
         <Image
           key={image.url}
           src={image.url}
           alt={`Step ${index}`}
           fill
-          className={`object-cover h-full w-full ${index === currentImageIndex ? "opacity-100" : "opacity-0"}`}
-          priority
-          quality={100}
-          onLoad={() => {
-            setAllLoaded((prev) => {
-              const newLoaded = [...prev];
-              newLoaded[index] = true;
-              return newLoaded;
-            });
-          }}
-          onError={() => {
-            console.error("Failed to load image:", image);
-          }}
+          className={`object-cover h-full w-full transition-opacity duration-300 ${
+            index === currentImageIndex ? "opacity-100" : "opacity-0"
+          }`}
+          // Disable Next.js optimisation so the exact same URL is requested and
+          // stays cached. This also avoids extra resized variants per render.
+          unoptimized
         />
       ))}
 
