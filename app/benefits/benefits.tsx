@@ -27,6 +27,9 @@ const Benefits = () => {
   const [isPlayingReverse, setIsPlayingReverse] = useState(false);
   const [isDonePlaying, setIsDonePlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  // Keep a mapping of original video URLs -> local objectURL created from a single fetch() so the
+  // browser never re-downloads the asset after the initial preload.
+  const [videoCache, setVideoCache] = useState<Record<string, string>>({});
   const { benefitsData } = useActiveComponent();
 
   console.log(benefitsData);
@@ -45,22 +48,23 @@ const Benefits = () => {
         x: 49.65,
         y: 31.5,
         color: "white",
-        video: benefitsData?.videos[0]?.url || "",
+        video: videoCache[benefitsData?.videos[0]?.url ?? ""] ?? benefitsData?.videos[0]?.url ?? "",
         displayMode: "modal",
       },
       {
         x: 44.5,
         y: 20,
         color: "white",
-        video: benefitsData?.videos[1]?.url || "",
+        video: videoCache[benefitsData?.videos[1]?.url ?? ""] ?? benefitsData?.videos[1]?.url ?? "",
         displayMode: "modal",
       },
       {
         x: 62.5,
         y: 55.5,
         color: "white",
-        video: benefitsData?.videos[2]?.url || "",
-        reverseVideo: benefitsData?.reverseVideos[0]?.url || "",
+        video: videoCache[benefitsData?.videos[2]?.url ?? ""] ?? benefitsData?.videos[2]?.url ?? "",
+        reverseVideo:
+          videoCache[benefitsData?.reverseVideos[0]?.url ?? ""] ?? benefitsData?.reverseVideos[0]?.url ?? "",
         displayMode: "fullscreen",
         stillImage: benefitsData?.stillImages[0]?.url || "",
       },
@@ -68,8 +72,9 @@ const Benefits = () => {
         x: 83,
         y: 66.75,
         color: "white",
-        video: benefitsData?.videos[3]?.url || "",
-        reverseVideo: benefitsData?.reverseVideos[1]?.url || "",
+        video: videoCache[benefitsData?.videos[3]?.url ?? ""] ?? benefitsData?.videos[3]?.url ?? "",
+        reverseVideo:
+          videoCache[benefitsData?.reverseVideos[1]?.url ?? ""] ?? benefitsData?.reverseVideos[1]?.url ?? "",
         displayMode: "fullscreen",
         stillImage: benefitsData?.stillImages[1]?.url || "",
       },
@@ -77,62 +82,79 @@ const Benefits = () => {
         x: 56.5,
         y: 42.5,
         color: "secondary",
-        video: benefitsData?.videos[4]?.url || "",
+        video: videoCache[benefitsData?.videos[4]?.url ?? ""] ?? benefitsData?.videos[4]?.url ?? "",
         displayMode: "modal",
       },
       {
         x: 37.25,
         y: 60,
         color: "secondary",
-        video: benefitsData?.videos[5]?.url || "",
+        video: videoCache[benefitsData?.videos[5]?.url ?? ""] ?? benefitsData?.videos[5]?.url ?? "",
         displayMode: "modal",
       },
       {
         x: 51,
         y: 69.75,
         color: "secondary",
-        video: benefitsData?.videos[6]?.url || "",
+        video: videoCache[benefitsData?.videos[6]?.url ?? ""] ?? benefitsData?.videos[6]?.url ?? "",
         displayMode: "modal",
       },
     ],
-    [benefitsData]
+    [benefitsData, videoCache]
   );
 
-  // Preload assets
+  // Preload images and videos once and set a local cache for videos so we can play them without
+  // additional network requests.
   useEffect(() => {
-    let loadedImages = 0;
-    let loadedVideos = 0;
+    if (!benefitsData) return;
 
-    // Collect all unique assets to preload
-    const allImages = [DEFAULT_IMAGE, ...hotspots.map((hotspot) => hotspot.stillImage).filter(Boolean)] as string[];
-    const allVideos = hotspots.flatMap((hotspot) => [hotspot.video, hotspot.reverseVideo]).filter(Boolean) as string[];
+    let loadedCount = 0;
 
-    const totalAssets = allImages.length + allVideos.length;
+    const imageUrls: string[] = [DEFAULT_IMAGE, ...benefitsData.stillImages.map((m) => m.url)];
+    const videoUrls: string[] = [
+      ...benefitsData.videos.map((m) => m.url),
+      ...benefitsData.reverseVideos.map((m) => m.url),
+    ];
 
-    // Preload images
-    allImages.forEach((src) => {
+    const totalAssets = imageUrls.length + videoUrls.length;
+
+    const markLoaded = () => {
+      loadedCount += 1;
+      if (loadedCount === totalAssets) setIsLoading(false);
+    };
+
+    // Preload images (browser cache will handle duplicates)
+    imageUrls.forEach((src) => {
       const img = new window.Image();
       img.src = src;
-      img.onload = () => {
-        loadedImages++;
-        if (loadedImages + loadedVideos === totalAssets) {
-          setIsLoading(false);
-        }
-      };
+      img.onload = markLoaded;
+      img.onerror = markLoaded;
     });
 
-    // Preload videos
-    allVideos.forEach((src) => {
-      const video = document.createElement("video");
-      video.src = src;
-      video.oncanplaythrough = () => {
-        loadedVideos++;
-        if (loadedImages + loadedVideos === totalAssets) {
-          setIsLoading(false);
-        }
-      };
+    // Preload videos – fetch each URL once and convert to objectURL for instant reuse.
+    videoUrls.forEach((src) => {
+      if (videoCache[src]) {
+        // Already fetched and cached in state
+        markLoaded();
+        return;
+      }
+
+      fetch(src)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          setVideoCache((prev) => ({ ...prev, [src]: objectUrl }));
+        })
+        .catch((err) => console.error("Error preloading video:", err))
+        .finally(markLoaded);
     });
-  }, [DEFAULT_IMAGE, hotspots]);
+
+    // Cleanup object URLs on unmount to prevent memory leaks
+    return () => {
+      Object.values(videoCache).forEach((url) => URL.revokeObjectURL(url));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [benefitsData]);
 
   // Handle modal video playback
   useEffect(() => {
