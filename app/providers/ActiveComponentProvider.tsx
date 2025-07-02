@@ -1,7 +1,9 @@
 import React from "react";
+import { useGLTF } from "@react-three/drei";
 import useAxios from "../hooks/useAxios";
 import { ComponentsData, ModelsData, ActiveComponent } from "../_types";
 import { TechnologiesData, SetupData, BenefitsData } from "../_types/axios";
+import { usePathname } from "next/navigation";
 
 interface LoadingState {
   components: boolean;
@@ -55,6 +57,8 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
 
   const { getComponentsData, getModelsData, getTechnologiesData, getSetupData, getBenefitsData } = useAxios();
 
+  const pathname = usePathname();
+
   React.useEffect(() => {
     const fetchData = async () => {
       try {
@@ -100,7 +104,23 @@ const ActiveComponentProvider = ({ children }: { children: React.ReactNode }) =>
     };
 
     fetchData();
-  }, [getComponentsData, getModelsData, getTechnologiesData, getSetupData, getBenefitsData]);
+    // get* functions are stable (from custom hook) so OK to ignore exhaustive deps lint
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Preload 3D models only when on the homepage and after modelsData is available.
+  React.useEffect(() => {
+    if (pathname !== "/" || !modelsData) return;
+
+    const paths: string[] = [
+      modelsData?.mediaData?.stand?.url ?? "",
+      modelsData?.mediaData?.nozel?.url ?? "",
+      modelsData?.mediaData?.machine?.url ?? "",
+      modelsData?.mediaData?.device?.url ?? "",
+    ].filter(Boolean);
+
+    paths.forEach((p) => useGLTF.preload(p));
+  }, [pathname, modelsData]);
 
   const handleSetActiveComponent = (component: ActiveComponent) => {
     if (activeComponent === component) {
