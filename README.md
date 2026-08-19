@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AB Medica
 
-## Getting Started
+<!-- repo-hygiene: reposhuttle-standard -->
 
-First, run the development server:
+**Customer-facing web application for AB Medica.**
+
+## Overview
+
+Customer-facing web application for AB Medica.
+
+This README records the repository's purpose, verified local workflow, major technology choices, and maintenance status so the project can be understood without first reverse-engineering the source tree.
+
+[View the deployed project](https://ab-medica.vercel.app)
+
+## Highlights
+
+- Application routing and production builds through Next.js
+- Interactive 3D rendering powered by Three.js
+- Utility-first styling with Tailwind CSS
+- Static typing across the primary application code
+- Hosted project link available from the repository metadata
+
+## Tech stack
+
+TypeScript, Next.js, React, Tailwind CSS, Three.js
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd <repository-directory>
+yarn install
+yarn run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Replace the placeholders with this repository's clone URL and local directory.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Purpose |
+| --- | --- |
+| `yarn run dev` | Start the local development workflow. |
+| `yarn run build` | Create a production build. |
+| `yarn run start` | Start the application. |
+| `yarn run lint` | Run static-analysis and lint checks. |
 
-## Learn More
+## Configuration
 
-To learn more about Next.js, take a look at the following resources:
+No repository-specific configuration file is required for the basic workflow documented above.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+app/  # application routes, layouts, and features
+public/  # static files served as-is
+```
 
-## Deploy on Vercel
+## Repository status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This repository is maintained as a project reference and portfolio artifact.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Development
+
+Before submitting a change, run `yarn run lint`, `yarn run build`.
+Keep changes focused, avoid committing generated artifacts unless the project already tracks them, and update this README whenever setup or behavior changes.
+
+## Security and configuration hygiene
+
+Keep secrets in local environment variables or an ignored `.env` file. Never commit API keys, access tokens, private keys, production database URLs, or customer data. If a credential is committed, revoke and rotate it; deleting the file in a later commit does not remove it from Git history.
+
+## Contributing
+
+Open an issue or provide context before making a large change. Prefer small pull requests with a clear purpose, verification notes, and screenshots for visible UI changes.
+
+## License
+
+No license file is currently included. Unless the repository owner states otherwise, the source is not offered under an open-source license.
